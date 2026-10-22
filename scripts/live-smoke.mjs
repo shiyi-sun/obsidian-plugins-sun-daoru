@@ -77,8 +77,10 @@ export default async function (ctx) {
           await sleep(100);
         }
 
-        plugin.settings.attachmentMode = "custom";
-        plugin.settings.customAttachmentFolder = "__daoru自测__/附件";
+        plugin.settings.attachmentMode = "obsidian";
+        plugin.settings.customAttachmentFolder = "附件/导入";
+        plugin.settings.groupAttachmentsByNote = true;
+        plugin.settings.normalizeHeadingLevels = false;
         plugin.settings.openAfterImport = false;
         plugin.settings.defaultTarget = "new";
         plugin.settings.addSourceFrontmatter = false;
@@ -114,8 +116,8 @@ export default async function (ctx) {
           "默认目标文件夹是当前笔记所在文件夹",
         );
         check(
-          text.includes("附件位置：__daoru自测__/附件"),
-          "导入面板显示自定义附件位置",
+          text.includes("附件位置：笔记同目录的 <文档名>-附件/"),
+          "导入面板显示按文档分组的附件位置",
         );
         check(
           app.workspace.getActiveFile()?.path === "__daoru自测__/导入测试.md",
@@ -176,13 +178,27 @@ export default async function (ctx) {
           String((content.match(/^# /gm) || []).length),
         );
         check(
-          content.includes("![[__daoru自测__/附件/功能营养素手册-001.png|698]]"),
-          "图片已落盘并保留 Word 显示宽度",
+          content.includes(
+            "![](功能营养素手册-附件/001.png)",
+          ),
+          "图片按相对路径用标准语法引用",
+        );
+        check(
+          content.includes(
+            "![维生素D核受体的分布](功能营养素手册-附件/007.png)",
+          ),
+          "Word 图片替代文字写进了 alt",
+        );
+        check(
+          !content.includes("[[") && !content.includes("]]"),
+          "正文不含 Obsidian 专有链接语法",
         );
         check(!content.includes("sun-daoru-image-"), "正文无图片占位符残留");
         const attachments = app.vault
           .getFiles()
-          .filter((file) => file.path.startsWith("__daoru自测__/附件/"));
+          .filter((file) =>
+            file.path.startsWith("__daoru自测__/功能营养素手册-附件/"),
+          );
         check(
           attachments.length === 149,
           "149 张图片全部写入附件目录",
@@ -465,7 +481,9 @@ export default async function (ctx) {
         delete window.__daoruLive;
 
         plugin.settings.attachmentMode = "obsidian";
-        plugin.settings.customAttachmentFolder = "附件/Word 导入";
+        plugin.settings.customAttachmentFolder = "附件/导入";
+        plugin.settings.groupAttachmentsByNote = true;
+        plugin.settings.normalizeHeadingLevels = false;
         plugin.settings.openAfterImport = true;
         plugin.settings.defaultTarget = "new";
         plugin.settings.addSourceFrontmatter = false;

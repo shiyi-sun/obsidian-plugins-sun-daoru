@@ -18,6 +18,32 @@ export function sanitizeBaseName(raw: string): string {
   return base;
 }
 
+export function sanitizeFolderName(raw: string): string {
+  let name = raw
+    .replace(/[\\/:*?"<>|#^\[\]]/g, "-")
+    .replace(/[\u0000-\u001f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[. ]+$/g, "");
+
+  if (!name) name = "未命名";
+  const characters = Array.from(name);
+  if (characters.length > 80) name = characters.slice(0, 80).join("").trim();
+  if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(name)) {
+    name = `导入-${name}`;
+  }
+  return name;
+}
+
+export function sanitizeRelativeFolder(relative: string): string {
+  return relative
+    .replace(/\\/g, "/")
+    .split("/")
+    .filter(Boolean)
+    .map(sanitizeFolderName)
+    .join("/");
+}
+
 export function joinVaultPath(folder: string, name: string): string {
   const cleanFolder = normalizePath(folder || "").replace(/^\/+|\/+$/g, "");
   return normalizePath(cleanFolder ? `${cleanFolder}/${name}` : name);

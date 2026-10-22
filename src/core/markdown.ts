@@ -1,12 +1,14 @@
 import TurndownService from "turndown";
 import { strikethrough } from "turndown-plugin-gfm";
 import { IMAGE_TOKEN_PREFIX, PendingImage } from "./docx";
+import { LossItem } from "./losses";
 
 export interface MarkdownConversion {
   markdown: string;
   simpleTables: number;
   complexTables: number;
   warnings: string[];
+  losses: LossItem[];
 }
 
 export function htmlToMarkdown(
@@ -14,6 +16,7 @@ export function htmlToMarkdown(
   images: PendingImage[],
 ): MarkdownConversion {
   const warnings: string[] = [];
+  const losses: LossItem[] = [];
   const imageByToken = new Map(images.map((image) => [image.token, image]));
   let simpleTables = 0;
   let complexTables = 0;
@@ -31,6 +34,11 @@ export function htmlToMarkdown(
   });
 
   service.use(strikethrough);
+  // Word 正文里字面写出的 <b>文字</b> 之类会被 Markdown 渲染器当 HTML 吞掉，
+  // 文本节点里的 < 一律转义（代码内容 turndown 不走 escape，不受影响）
+  const defaultEscape = service.escape.bind(service);
+  service.escape = (text: string) => defaultEscape(text).replace(/</g, "&lt;");
+
   service.remove([
     "script",
     "style",
@@ -46,10 +54,17 @@ export function htmlToMarkdown(
     "option",
   ]);
 
-  service.addRule("sunDaoruUnsafeLink", {
-    filter: (node) =>
-      node.nodeName === "A" && isUnsafeHref(node.getAttribute("href")),
-    replacement: (content) => content,
+  service.addRule("sunDaoruLink", {
+    filter: "a",
+    replacement: (content, node) => {
+      const href = (node.getAttribute("href") || "").trim();
+      const label = content.replace(/\s+/g, " ").trim();
+      // 文档内跳转（#锚点）不做转换：标准 Markdown 的锚点规则和 Word 对不上，只保留文字
+      if (!href || href.startsWith("#") || isUnsafeHref(href)) return content;
+      if (!label) return content;
+      if (label.startsWith("[") && label.endsWith(")")) return content;
+      return `[${label}](${escapeHref(href)})`;
+    },
   });
 
   service.addRule("sunDaoruImage", {
@@ -63,12 +78,9 @@ export function htmlToMarkdown(
         unresolvedImages++;
         return "";
       }
-      if (image.previewable) {
-        const width = image.widthPx ? `|${image.widthPx}` : "";
-        return `![[${image.link}${width}]]`;
-      }
-      const alt = cleanAlt(node.getAttribute("alt") || "原图");
-      return `[[${image.link}|${alt}]]`;
+      const alt = cleanAlt(node.getAttribute("alt") || image.altText || "");
+      if (!image.previewable) return `[${alt || "原图"}](${destination(image.link)})`;
+      return imageEmbed(image.link, alt);
     },
   });
 
@@ -95,6 +107,16 @@ export function htmlToMarkdown(
     replacement: () => "<br>\n",
   });
 
+  service.addRule("sunDaoruCodeBlock", {
+    filter: "pre",
+    replacement: (_content, node) => {
+      const text = (node.textContent || "").replace(/\s+$/, "");
+      if (!text.trim()) return "";
+      const fence = text.includes("```") ? "````" : "```";
+      return `\n\n${fence}\n${text}\n${fence}\n\n`;
+    },
+  });
+
   service.addRule("sunDaoruUnderline", {
     filter: "u",
     replacement: (content) => `<u>${content}</u>`,
@@ -110,27 +132,46 @@ export function htmlToMarkdown(
     replacement: (content) => `<sub>${content}</sub>`,
   });
 
-  service.addRule("sunDaoruHighlight", {
-    filter: "mark",
-    replacement: (content) => `==${content}==`,
-  });
-
   let markdown = service.turndown(html);
   markdown = cleanMarkdown(markdown);
 
   if (tableImages > 0) {
-    warnings.push(
-      `复杂表格内有 ${tableImages} 处图片，已保留为嵌入语法文本；Obsidian 不一定会直接在 HTML 表格中渲染。`,
-    );
+    losses.push({
+      kind: "info",
+      label: "HTML 表格里的图片",
+      count: tableImages,
+      detail: "表格是 HTML 块，标准图片语法进不去，用 <img> 标签保留。",
+    });
   }
   if (unresolvedImages > 0) {
-    warnings.push(`有 ${unresolvedImages} 张图片未能匹配到附件，已从正文中移除。`);
+    losses.push({
+      kind: "lost",
+      label: "找不到附件的图片引用",
+      count: unresolvedImages,
+      detail: "这些图片没有对应的图片数据，已从正文移除。",
+    });
   }
   if (markdown.includes(IMAGE_TOKEN_PREFIX)) {
     warnings.push("正文中残留了图片占位符，请把文档发给开发者排查。");
   }
 
-  return { markdown, simpleTables, complexTables, warnings };
+  return { markdown, simpleTables, complexTables, warnings, losses };
+}
+
+function imageEmbed(link: string, alt: string): string {
+  // Obsidian 会把纯数字的 alt 当成显示尺寸，只能退回 <img> 才保得住这行文字
+  if (/^\d+(?:x\d+)?$/.test(alt)) return htmlImage(link, alt);
+  return `![${alt}](${destination(link)})`;
+}
+
+/** 标准 Markdown 的链接目标：空格和括号要用尖括号包住，尖括号本身转义 */
+function destination(path: string): string {
+  const clean = path.replace(/</g, "%3C").replace(/>/g, "%3E");
+  return /[\s()]/.test(clean) ? `<${clean}>` : clean;
+}
+
+function htmlImage(link: string, alt: string): string {
+  return `<img src="${escapeAttribute(link)}" alt="${escapeAttribute(alt)}">`;
 }
 
 function isSimpleTable(table: HTMLTableElement): boolean {
@@ -224,6 +265,7 @@ function replaceTableImages(
   imageByToken: Map<string, PendingImage>,
 ): number {
   let count = 0;
+
   for (const image of Array.from(root.querySelectorAll("img"))) {
     const token = image.getAttribute("src") || "";
     const pending = imageByToken.get(token);
@@ -231,25 +273,28 @@ function replaceTableImages(
     if (!parent) continue;
 
     const doc = image.ownerDocument;
-    const blank = doc.createTextNode(" ");
-    const breakBefore = doc.createElement("br");
-    const breakAfter = doc.createElement("br");
-    let text: Text;
+    const alt = cleanAlt(image.getAttribute("alt") || pending?.altText || "");
+    let text: Node;
 
-    if (pending && pending.link) {
-      const alt = cleanAlt(image.getAttribute("alt") || "原图");
+    if (pending?.link && pending.previewable) {
+      const element = doc.createElement("img");
+      element.setAttribute("src", pending.link);
+      element.setAttribute("alt", alt);
+      text = element;
+      count++;
+    } else if (pending?.link) {
       text = doc.createTextNode(
-        pending.previewable ? `![[${pending.link}]]` : `[[${pending.link}|${alt}]]`,
+        `${alt || "图片"}（${pending.link}，这种格式无法预览，已保存原文件）`,
       );
       count++;
     } else {
       text = doc.createTextNode("（图片缺失）");
     }
 
-    parent.insertBefore(blank, image);
-    parent.insertBefore(breakBefore, image);
+    parent.insertBefore(doc.createTextNode(" "), image);
+    parent.insertBefore(doc.createElement("br"), image);
     parent.insertBefore(text, image);
-    parent.insertBefore(breakAfter, image);
+    parent.insertBefore(doc.createElement("br"), image);
     parent.removeChild(image);
   }
   return count;
@@ -277,6 +322,7 @@ const ALLOWED_TABLE_TAGS = new Set([
   "sup",
   "sub",
   "a",
+  "img",
   "ol",
   "ul",
   "li",
@@ -318,6 +364,8 @@ function sanitizeTable(root: HTMLTableElement): void {
     }
 
     const href = tag === "a" ? element.getAttribute("href") : null;
+    const src = tag === "img" ? element.getAttribute("src") : null;
+    const alt = tag === "img" ? element.getAttribute("alt") : null;
     const colspan = element.getAttribute("colspan");
     const rowspan = element.getAttribute("rowspan");
     for (const attr of Array.from(element.attributes)) {
@@ -326,6 +374,10 @@ function sanitizeTable(root: HTMLTableElement): void {
 
     if (tag === "a" && href && !isUnsafeHref(href)) {
       element.setAttribute("href", href.trim());
+    }
+    if (tag === "img") {
+      if (src) element.setAttribute("src", src.trim());
+      if (alt) element.setAttribute("alt", alt);
     }
     if (tag === "td" || tag === "th") {
       if (colspan && /^\d+$/.test(colspan) && Number(colspan) > 1) {
@@ -355,15 +407,29 @@ function isUnsafeHref(href: string | null): boolean {
   if (!href) return false;
   const value = href.trim().toLowerCase().replace(/[\u0000-\u001f]/g, "");
   if (!value) return false;
-  return /^(?:javascript|vbscript|data|file):/.test(value) || value.startsWith("#");
+  return /^(?:javascript|vbscript|data|file):/.test(value);
 }
 
 function cleanAlt(value: string): string {
-  const clean = value
+  return value
     .replace(/[|[\]]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  return clean || "原图";
+}
+
+function escapeHref(href: string): string {
+  return href.replace(
+    /[ ()<>"`]/g,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0")}`,
+  );
+}
+
+function escapeAttribute(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 function cleanMarkdown(markdown: string): string {

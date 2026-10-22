@@ -4923,17 +4923,17 @@ function sample(obj, n, guard) {
       obj = values(obj);
     return obj[random(obj.length - 1)];
   }
-  var sample2 = toArray(obj);
-  var length = getLength_default(sample2);
+  var sample3 = toArray(obj);
+  var length = getLength_default(sample3);
   n = Math.max(Math.min(n, length), 0);
   var last2 = length - 1;
   for (var index = 0; index < n; index++) {
     var rand = random(index, last2);
-    var temp = sample2[index];
-    sample2[index] = sample2[rand];
-    sample2[rand] = temp;
+    var temp = sample3[index];
+    sample3[index] = sample3[rand];
+    sample3[rand] = temp;
   }
-  return sample2.slice(0, n);
+  return sample3.slice(0, n);
 }
 var init_sample = __esm({
   "node_modules/underscore/modules/sample.js"() {
@@ -5379,13 +5379,13 @@ var init_range = __esm({
 });
 
 // node_modules/underscore/modules/chunk.js
-function chunk(array, count) {
-  if (count == null || count < 1)
+function chunk(array, count2) {
+  if (count2 == null || count2 < 1)
     return [];
   var result2 = [];
   var i = 0, length = array.length;
   while (i < length) {
-    result2.push(slice.call(array, i, i += count));
+    result2.push(slice.call(array, i, i += count2));
   }
   return result2;
 }
@@ -7860,8 +7860,8 @@ var require_dom = __commonJS({
     }
     CharacterData.prototype = {
       data: "",
-      substringData: function(offset, count) {
-        return this.data.substring(offset, offset + count);
+      substringData: function(offset, count2) {
+        return this.data.substring(offset, offset + count2);
       },
       appendData: function(text) {
         text = this.data + text;
@@ -7874,12 +7874,12 @@ var require_dom = __commonJS({
       appendChild: function(newChild) {
         throw new Error(ExceptionMessage[HIERARCHY_REQUEST_ERR]);
       },
-      deleteData: function(offset, count) {
-        this.replaceData(offset, count, "");
+      deleteData: function(offset, count2) {
+        this.replaceData(offset, count2, "");
       },
-      replaceData: function(offset, count, text) {
+      replaceData: function(offset, count2, text) {
         var start = this.data.substring(0, offset);
-        var end = this.data.substring(offset + count);
+        var end = this.data.substring(offset + count2);
         text = start + text + end;
         this.nodeValue = this.data = text;
         this.length = text.length;
@@ -17029,8 +17029,8 @@ var require_markdown_writer = __commonJS({
         htmlToMarkdown2["h" + i] = markdownElement(repeatString("#", i) + " ", "\n\n");
       }
     })();
-    function repeatString(value, count) {
-      return new Array(count + 1).join(value);
+    function repeatString(value, count2) {
+      return new Array(count2 + 1).join(value);
     }
     function markdownWriter() {
       var fragments = [];
@@ -17377,8 +17377,8 @@ var require_document_to_html = __commonJS({
       function convertCommentReference(reference, messages, context) {
         return findHtmlPath(reference, htmlPaths.ignore).wrap(function() {
           var comment = comments[reference.commentId];
-          var count = referencedComments.length + 1;
-          var label = "[" + commentAuthorLabel(comment) + count + "]";
+          var count2 = referencedComments.length + 1;
+          var label = "[" + commentAuthorLabel(comment) + count2 + "]";
           referencedComments.push({ label, comment });
           return [
             Html.freshElement("a", {
@@ -18865,9 +18865,9 @@ var require_style_reader = __commonJS({
       }
     }
     function describeFailure(input, parseResult) {
-      return "Did not understand this style mapping, so ignored it: " + input + "\n" + parseResult.errors().map(describeError).join("\n");
+      return "Did not understand this style mapping, so ignored it: " + input + "\n" + parseResult.errors().map(describeError2).join("\n");
     }
-    function describeError(error) {
+    function describeError2(error) {
       return "Error was at character number " + error.characterNumber() + ": Expected " + error.expected + " but got " + error.actual;
     }
     var styleRule = createStyleRule();
@@ -19109,12 +19109,16 @@ module.exports = __toCommonJS(main_exports);
 var import_obsidian6 = require("obsidian");
 
 // src/file-picker.ts
-function pickDocxFiles() {
+function pickFiles(directory) {
   return new Promise((resolve) => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".docx,.docm,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-word.document.macroEnabled.12";
     input.multiple = true;
+    if (directory) {
+      input.setAttribute("webkitdirectory", "");
+      input.setAttribute("directory", "");
+    }
     input.style.position = "fixed";
     input.style.left = "-9999px";
     input.style.top = "0";
@@ -19149,132 +19153,360 @@ function pickDocxFiles() {
     input.click();
   });
 }
+function pickDocxFiles() {
+  return pickFiles(false);
+}
+function pickDocxFolder() {
+  return pickFiles(true);
+}
 
 // src/importer.ts
 var import_obsidian2 = require("obsidian");
 
+// src/core/errors.ts
+function describeError(error) {
+  const raw = (error instanceof Error ? error.message : String(error)).trim();
+  if (!raw)
+    return "\u5BFC\u5165\u5931\u8D25\uFF1A\u672A\u77E5\u9519\u8BEF\u3002";
+  if (/[一-鿿]/.test(raw))
+    return raw;
+  if (/end with a dot or a space|outside the vault|invalid (?:path|name|file name)/i.test(raw)) {
+    return `\u9644\u4EF6\u6587\u4EF6\u5939\u8DEF\u5F84\u4E0D\u5408\u6CD5\uFF08${raw}\uFF09\u3002\u8BF7\u5728\u8BBE\u7F6E\u91CC\u6362\u4E00\u4E2A\u6B63\u5E38\u7684\u6587\u4EF6\u5939\u540D\uFF0C\u522B\u7528\u300C..\u300D\u3001\u7EAF\u70B9\u53F7\u6216\u7ED3\u5C3E\u7559\u7A7A\u683C\u3002`;
+  }
+  if (/reading '[^']*' of undefined|charAt|undefined is not a function/i.test(raw)) {
+    return `\u8FD9\u4EFD\u6587\u6863\u7ED3\u6784\u5F02\u5E38\uFF0C\u5185\u90E8\u6709\u6307\u5411\u4E0D\u5B58\u5728\u5185\u5BB9\u7684\u5F15\u7528\uFF0C\u65E0\u6CD5\u89E3\u6790\uFF08${raw}\uFF09\u3002\u5982\u679C\u5B83\u5728 Word \u91CC\u80FD\u6B63\u5E38\u6253\u5F00\uFF0C\u53EF\u4EE5\u628A\u6587\u4EF6\u53D1\u7ED9\u5F00\u53D1\u8005\u6392\u67E5\u3002`;
+  }
+  return `\u8FD9\u4EFD\u6587\u6863\u89E3\u6790\u5931\u8D25\uFF1A${raw}\u3002\u5982\u679C\u5B83\u5728 Word \u91CC\u80FD\u6B63\u5E38\u6253\u5F00\uFF0C\u53EF\u4EE5\u628A\u6587\u4EF6\u53D1\u7ED9\u5F00\u53D1\u8005\u6392\u67E5\u3002`;
+}
+
 // src/core/docx.ts
 var import_jszip = __toESM(require_jszip_min());
 var mammoth = __toESM(require_lib3());
-var IMAGE_TOKEN_PREFIX = "sun-daoru-image-";
-var EMU_PER_PIXEL = 9525;
-var MAX_IMAGE_WIDTH_PX = 1600;
-async function convertDocx(data) {
-  assertZip(data);
-  let zip;
-  try {
-    zip = await import_jszip.default.loadAsync(data);
-  } catch (e) {
-    throw new Error("\u65E0\u6CD5\u8BFB\u53D6\u6587\u4EF6\uFF1A\u5B83\u53EF\u80FD\u5DF2\u52A0\u5BC6\u3001\u635F\u574F\uFF0C\u6216\u4E0D\u662F\u771F\u6B63\u7684 .docx \u6587\u4EF6\u3002");
-  }
-  const documentFile = zip.file("word/document.xml");
-  if (!documentFile) {
-    throw new Error("\u8FD9\u4E2A\u6587\u4EF6\u91CC\u6CA1\u6709 Word \u6B63\u6587\uFF0C\u53EF\u80FD\u4E0D\u662F\u6709\u6548\u7684 .docx \u6587\u6863\u3002");
-  }
-  const documentXml = await documentFile.async("string");
-  const stylesFile = zip.file("word/styles.xml");
-  const stylesXml = stylesFile ? await stylesFile.async("string") : "";
-  const styleMap = buildStyleMap(stylesXml, documentXml);
-  const extents = extractImageExtents(documentXml);
-  const images2 = [];
-  const warnings = [];
-  const imageReadFailures = [];
-  let imageIndex = 0;
-  const result2 = await mammoth.convertToHtml(
-    nodeOrBrowserInput(data),
-    {
-      styleMap,
-      ignoreEmptyParagraphs: true,
-      convertImage: mammoth.images.imgElement(async (image) => {
-        const index = imageIndex++;
-        const token = `${IMAGE_TOKEN_PREFIX}${index}`;
-        try {
-          const buffer = await image.readAsArrayBuffer();
-          const format = imageFormat(image.contentType);
-          images2.push({
-            token,
-            data: buffer,
-            contentType: image.contentType || "application/octet-stream",
-            extension: format.extension,
-            previewable: format.previewable
-          });
-          return { src: token };
-        } catch (e) {
-          imageReadFailures.push(index + 1);
-          return { src: "" };
-        }
-      })
+
+// src/core/losses.ts
+var TEXT_TAG = /<w:t(?:\s[^>]*)?>/g;
+var TEXT_RUN = /<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g;
+var DELETED_TEXT_RUN = /<w:delText(?:\s[^>]*)?>([\s\S]*?)<\/w:delText>/g;
+var MATH_TEXT_RUN = /<m:t(?:\s[^>]*)?>([\s\S]*?)<\/m:t>/g;
+var BODY_PART = /^word\/(?:document|footnotes|endnotes)\.xml$/;
+var HEADER_FOOTER_PART = /^word\/(?:header|footer)\d*\.xml$/;
+async function scanLosses(zip, documentXml, ctx) {
+  var _a, _b;
+  const losses = [];
+  const bodyParts = [documentXml];
+  let headerFooterParts = 0;
+  let headerFooterTexts = 0;
+  let headerFooterImages = 0;
+  for (const entry of Object.values(zip.files)) {
+    if (entry.dir)
+      continue;
+    if (entry.name === "word/comments.xml")
+      continue;
+    if (HEADER_FOOTER_PART.test(entry.name)) {
+      const xml = await entry.async("string");
+      headerFooterParts++;
+      headerFooterTexts += count(xml, TEXT_TAG);
+      headerFooterImages += count(xml, /<a:blip\b/g);
+    } else if (BODY_PART.test(entry.name) && entry.name !== "word/document.xml") {
+      bodyParts.push(await entry.async("string"));
     }
-  );
-  if (!result2.value.trim()) {
-    throw new Error("\u672A\u80FD\u4ECE\u6587\u6863\u4E2D\u8BFB\u53D6\u6B63\u6587\u5185\u5BB9\u3002");
   }
-  if (imageReadFailures.length > 0) {
-    warnings.push(
-      `\u6709 ${imageReadFailures.length} \u5F20\u56FE\u7247\u65E0\u6CD5\u8BFB\u53D6\uFF0C\u5DF2\u8DF3\u8FC7\uFF08\u7B2C ${imageReadFailures.slice(0, 8).join("\u3001")} \u5F20${imageReadFailures.length > 8 ? "\u7B49" : ""}\uFF09\u3002`
-    );
+  const body = bodyParts.join("\n");
+  const plainHtml = stripTags(ctx.html);
+  const commentsFile = zip.file("word/comments.xml");
+  if (commentsFile) {
+    const xml = await commentsFile.async("string");
+    const total = count(xml, /<w:comment\b/g);
+    if (total > 0) {
+      losses.push({
+        kind: "lost",
+        label: "\u6279\u6CE8\u5185\u5BB9",
+        count: total,
+        detail: `\u6279\u6CE8\u6846\u91CC\u7684\u6587\u5B57\u4E0D\u5BFC\u5165\uFF08\u88AB\u6279\u6CE8\u7684\u6B63\u6587\u5DF2\u4FDD\u7559\uFF09\u3002\u4F8B\u5982\uFF1A${preview(sample2(xml, TEXT_RUN))}`
+      });
+    }
   }
-  if (extents.length === images2.length) {
-    images2.forEach((image, index) => {
-      const width = Math.round(extents[index].cx / EMU_PER_PIXEL);
-      if (width >= 16)
-        image.widthPx = Math.min(width, MAX_IMAGE_WIDTH_PX);
+  const deleted = count(body, /<w:delText\b/g);
+  if (deleted > 0) {
+    losses.push({
+      kind: "lost",
+      label: "\u4FEE\u8BA2\u91CC\u88AB\u5220\u6389\u7684\u6587\u5B57",
+      count: deleted,
+      detail: `\u6587\u6863\u8FD8\u6709\u672A\u63A5\u53D7\u7684\u4FEE\u8BA2\uFF0C\u5220\u9664\u7684\u90E8\u5206\u4E0D\u5BFC\u5165\u3002\u4F8B\u5982\uFF1A${preview(sample2(body, DELETED_TEXT_RUN))}`
     });
   }
-  const seenMessages = /* @__PURE__ */ new Set();
-  for (const message of result2.messages) {
-    const text = String(message.message || "").trim();
-    if (!text || seenMessages.has(text))
-      continue;
-    if (/unrecognised element was ignored/i.test(text))
-      continue;
-    if (!/image|picture|drawing/i.test(text))
-      continue;
-    seenMessages.add(text);
-    warnings.push(text);
+  const formulas = count(body, /<m:oMath\b/g);
+  if (formulas > 0) {
+    losses.push({
+      kind: "lost",
+      label: "\u516C\u5F0F",
+      count: formulas,
+      detail: `\u516C\u5F0F\u5BF9\u8C61\u6574\u4F53\u4E0D\u5BFC\u5165\uFF0C\u542B\u5176\u4E2D\u7684\u6587\u5B57\u3002\u4F8B\u5982\uFF1A${preview(sample2(body, MATH_TEXT_RUN))}`
+    });
   }
-  const html = result2.value;
-  return {
-    html,
-    images: images2,
-    warnings,
-    styleMapEntries: styleMap.length,
-    stats: {
-      headings: (html.match(/<h[1-6]\b/g) || []).length,
-      paragraphs: (html.match(/<p\b/g) || []).length,
-      tables: (html.match(/<table\b/g) || []).length,
-      images: images2.length
+  const textboxLost = [];
+  let textboxTotal = 0;
+  for (const match of documentXml.matchAll(/<w:txbxContent\b[\s\S]*?<\/w:txbxContent>/g)) {
+    textboxTotal++;
+    const text = sample2(match[0], TEXT_RUN, 80);
+    if (text && !plainHtml.includes(text.slice(0, 20)))
+      textboxLost.push(text);
+  }
+  if (textboxLost.length > 0) {
+    losses.push({
+      kind: "lost",
+      label: "\u6587\u672C\u6846\u6587\u5B57",
+      count: textboxLost.length,
+      detail: `\u5171 ${textboxTotal} \u4E2A\u6587\u672C\u6846\uFF0C\u5176\u4E2D ${textboxLost.length} \u4E2A\u7684\u6587\u5B57\u6CA1\u8FDB\u6B63\u6587\u3002\u4F8B\u5982\uFF1A${preview(
+        textboxLost[0]
+      )}`
+    });
+  }
+  if (headerFooterParts > 0) {
+    losses.push({
+      kind: "lost",
+      label: "\u9875\u7709/\u9875\u811A",
+      count: headerFooterParts,
+      detail: `${headerFooterParts} \u4E2A\u9875\u7709\u9875\u811A\u90E8\u4EF6\u4E0D\u5BFC\u5165\uFF0C\u542B ${headerFooterTexts} \u6BB5\u6587\u5B57\u3001${headerFooterImages} \u5F20\u56FE\u7247\u3002`
+    });
+  }
+  const fieldNames = /* @__PURE__ */ new Map();
+  for (const match of body.matchAll(/<w:instrText(?:\s[^>]*)?>([\s\S]*?)<\/w:instrText>/g)) {
+    const words = decodeXml(match[1]).toUpperCase().match(/[A-Z][A-Z0-9]*/g);
+    const name = words == null ? void 0 : words[0];
+    if (!name || name === "HYPERLINK")
+      continue;
+    fieldNames.set(name, (fieldNames.get(name) || 0) + 1);
+  }
+  if (fieldNames.size > 0) {
+    const summary = Array.from(fieldNames).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([name, total]) => `${name}\xD7${total}`).join("\u3001");
+    losses.push({
+      kind: "downgraded",
+      label: "\u57DF\u4EE3\u7801\u7ED3\u679C",
+      count: count(body, /<w:instrText\b/g),
+      detail: `\u9875\u7801\u3001\u76EE\u5F55\u3001\u4EA4\u53C9\u5F15\u7528\u7B49\u57DF\u7684\u8BA1\u7B97\u7ED3\u679C\u4E0D\u5B8C\u6574\uFF08${summary}\uFF09\u3002`
+    });
+  }
+  if (ctx.internalLinks > 0) {
+    losses.push({
+      kind: "lost",
+      label: "\u6587\u6863\u5185\u8DF3\u8F6C",
+      count: ctx.internalLinks,
+      detail: "\u76EE\u5F55\u6761\u76EE\u3001\u4E66\u7B7E\u548C\u4EA4\u53C9\u5F15\u7528\u70B9\u4E0D\u52A8\u4E86\uFF0C\u6587\u5B57\u5DF2\u4FDD\u7559\u3002"
+    });
+  }
+  const relTargets = /* @__PURE__ */ new Map();
+  const externalRids = /* @__PURE__ */ new Set();
+  const relsFile = zip.file("word/_rels/document.xml.rels");
+  if (relsFile) {
+    const rels = await relsFile.async("string");
+    for (const match of rels.matchAll(/<Relationship\b[^>]*>/g)) {
+      const id = (_a = /\bId="([^"]*)"/.exec(match[0])) == null ? void 0 : _a[1];
+      const target = (_b = /\bTarget="([^"]*)"/.exec(match[0])) == null ? void 0 : _b[1];
+      if (id && target)
+        relTargets.set(id, target);
+      if (id && /\bTargetMode="External"/.test(match[0]))
+        externalRids.add(id);
     }
+  }
+  const blipIds = Array.from(
+    documentXml.matchAll(/<a:blip\b[^>]*\br:(?:embed|link)="([^"]+)"/g)
+  ).map((match) => decodeXml(match[1]));
+  const externalImages = blipIds.filter((id) => externalRids.has(id)).length;
+  if (externalImages > 0) {
+    losses.push({
+      kind: "lost",
+      label: "\u94FE\u63A5\u5230\u6587\u4EF6\u7684\u56FE\u7247",
+      count: externalImages,
+      detail: "Word \u91CC\u4EE5\u300C\u94FE\u63A5\u5230\u6587\u4EF6\u300D\u65B9\u5F0F\u63D2\u5165\u7684\u56FE\uFF0C\u56FE\u7247\u672C\u4F53\u4E0D\u5728\u6587\u6863\u5185\uFF0C\u65E0\u6CD5\u5BFC\u5165\u3002"
+    });
+  }
+  const embeds = blipIds.map((id) => relTargets.get(id) || id);
+  const duplicates = embeds.length - new Set(embeds).size;
+  if (duplicates > 0) {
+    losses.push({
+      kind: "info",
+      label: "\u88AB\u591A\u6B21\u5F15\u7528\u7684\u540C\u4E00\u56FE\u7247",
+      count: duplicates,
+      detail: `${embeds.length} \u5904\u56FE\u7247\u5F15\u7528\u91CC\u6709 ${duplicates} \u5904\u662F\u91CD\u590D\u56FE\u7247\uFF0C\u9644\u4EF6\u4F1A\u5404\u5B58\u4E00\u4EFD\u3002`
+    });
+  }
+  const embedded = count(body, /<w:object\b/g) + count(body, /\buri="[^"]*\/chart"/g) + count(body, /\buri="[^"]*diagram(?:Layout|Data|Colors|Text|QuickStyle)?"/g) + count(body, /<w:altChunk\b/g);
+  if (embedded > 0) {
+    losses.push({
+      kind: "lost",
+      label: "\u56FE\u8868\u4E0E\u5D4C\u5165\u5BF9\u8C61",
+      count: embedded,
+      detail: "\u56FE\u8868\u3001SmartArt\u3001Excel \u7B49\u5D4C\u5165\u5BF9\u8C61\u4E0D\u5BFC\u5165\uFF08Word \u91CC\u770B\u5230\u7684\u662F\u5B83\u4EEC\u7684\u9884\u89C8\u56FE\uFF09\u3002"
+    });
+  }
+  return losses;
+}
+function count(xml, pattern) {
+  let total = 0;
+  for (const _3 of xml.matchAll(pattern))
+    total++;
+  return total;
+}
+var FIDELITY_SKIP = ["w:object", "w:txbxContent"];
+var MIN_SEGMENT = 4;
+function checkTextFidelity(documentXml, markdown) {
+  const haystack = plainText(markdown);
+  if (!haystack)
+    return null;
+  let region = documentXml;
+  for (const tag of FIDELITY_SKIP) {
+    region = region.replace(new RegExp(`<${tag}\\b[\\s\\S]*?</${tag}>`, "g"), "");
+  }
+  const segments = /* @__PURE__ */ new Map();
+  for (const match of region.matchAll(TEXT_RUN)) {
+    const raw = decodeXml(match[1]);
+    const key = plainText(raw);
+    if (key.length < MIN_SEGMENT)
+      continue;
+    const known = segments.get(key);
+    if (known)
+      known.expected++;
+    else
+      segments.set(key, { expected: 1, sample: raw.trim() });
+  }
+  if (segments.size === 0)
+    return null;
+  const missing = [];
+  let missingCount = 0;
+  let shrunkCount = 0;
+  for (const [key, entry] of segments) {
+    const found = occurrences(haystack, key, entry.expected);
+    if (found === 0) {
+      missingCount++;
+      if (missing.length < 3)
+        missing.push(entry.sample.slice(0, 30));
+    } else if (found < entry.expected) {
+      shrunkCount++;
+    }
+  }
+  if (missingCount === 0 && shrunkCount === 0)
+    return null;
+  const parts = [];
+  if (missingCount > 0)
+    parts.push(`${missingCount} \u6BB5\u6587\u5B57\u5728\u7B14\u8BB0\u91CC\u627E\u4E0D\u5230`);
+  if (shrunkCount > 0)
+    parts.push(`${shrunkCount} \u6BB5\u6587\u5B57\u51FA\u73B0\u6B21\u6570\u6BD4\u539F\u6587\u6863\u5C11`);
+  return {
+    kind: "lost",
+    label: "\u7591\u4F3C\u672A\u8BC6\u522B\u7684\u5185\u5BB9\u4E22\u5931",
+    count: missingCount + shrunkCount,
+    detail: `${parts.join("\uFF0C")}\u3002${missing.length ? `\u4F8B\u5982\uFF1A${missing.map((text) => `\u300C${text}\u300D`).join(" ")}` : ""}\u8FD9\u7C7B\u5DEE\u5F02\u4E0D\u5728\u5DF2\u77E5\u6E05\u5355\u91CC\uFF0C\u8BF7\u628A\u8FD9\u4EFD\u6587\u4EF6\u53D1\u7ED9\u5F00\u53D1\u8005\u6392\u67E5\u3002`
   };
 }
-function assertZip(data) {
-  const bytes = new Uint8Array(data);
-  if (bytes.length < 4) {
-    throw new Error("\u6587\u4EF6\u4E3A\u7A7A\u6216\u5185\u5BB9\u4E0D\u5B8C\u6574\u3002");
+function occurrences(haystack, needle, atLeast) {
+  let count2 = 0;
+  let from = 0;
+  while (count2 < atLeast) {
+    const index = haystack.indexOf(needle, from);
+    if (index === -1)
+      break;
+    count2++;
+    from = index + needle.length;
   }
-  const isZip = bytes[0] === 80 && bytes[1] === 75;
-  if (isZip)
-    return;
-  const isOle = bytes[0] === 208 && bytes[1] === 207 && bytes[2] === 17 && bytes[3] === 224;
-  if (isOle) {
-    throw new Error(
-      "\u65E0\u6CD5\u8BFB\u53D6\uFF1A\u6587\u4EF6\u53EF\u80FD\u5DF2\u52A0\u5BC6\uFF0C\u6216\u662F\u65E7\u7248 .doc \u683C\u5F0F\u3002\u8BF7\u53D6\u6D88\u5BC6\u7801\u5E76\u5728 Word/WPS \u4E2D\u53E6\u5B58\u4E3A .docx \u540E\u91CD\u8BD5\u3002"
-    );
-  }
-  throw new Error("\u65E0\u6CD5\u8BFB\u53D6\uFF1A\u8FD9\u4E0D\u662F\u6709\u6548\u7684 .docx \u6587\u4EF6\u3002");
+  return count2;
 }
-function nodeOrBrowserInput(data) {
-  if (typeof window === "undefined" && typeof Buffer !== "undefined") {
-    return { buffer: Buffer.from(data) };
-  }
-  return { arrayBuffer: data };
+function plainText(value) {
+  return value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_3, digits) => String.fromCodePoint(Number(digits))).replace(
+    /&#x([0-9a-f]+);/gi,
+    (_3, digits) => String.fromCodePoint(parseInt(digits, 16))
+  ).replace(/&amp;/g, "&").replace(/\\(.)/g, "$1").replace(/<\/?[a-z][^>]*>/gi, "").replace(/[![\]()<>#*_|~`-]/g, "").replace(/[\s　]+/g, "");
 }
-function buildStyleMap(stylesXml, documentXml) {
+function sample2(xml, pattern, maxLength = 60) {
+  const parts = [];
+  let length = 0;
+  for (const match of xml.matchAll(pattern)) {
+    const text = decodeXml(match[1]).replace(/\s+/g, " ").trim();
+    if (!text)
+      continue;
+    parts.push(text);
+    length += text.length;
+    if (length >= maxLength)
+      break;
+  }
+  return parts.join("");
+}
+function preview(text) {
+  const characters = Array.from(text);
+  return characters.length > 40 ? `${characters.slice(0, 40).join("")}\u2026` : text;
+}
+function stripTags(html) {
+  return html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+}
+function decodeXml(value) {
+  return value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_3, digits) => String.fromCodePoint(Number(digits))).replace(
+    /&#x([0-9a-f]+);/gi,
+    (_3, digits) => String.fromCodePoint(parseInt(digits, 16))
+  ).replace(/&amp;/g, "&");
+}
+
+// src/core/xml.ts
+function decodeXml2(value) {
+  return value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_3, digits) => String.fromCodePoint(Number(digits))).replace(
+    /&#x([0-9a-f]+);/gi,
+    (_3, digits) => String.fromCodePoint(parseInt(digits, 16))
+  ).replace(/&amp;/g, "&");
+}
+function xmlValue(xml, tag) {
+  var _a;
+  const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return (_a = new RegExp(`<${escapedTag}\\b[^>]*\\bw:val="([^"]*)"`).exec(xml)) == null ? void 0 : _a[1];
+}
+function countMatches(xml, pattern) {
+  let total = 0;
+  for (const _3 of xml.matchAll(pattern))
+    total++;
+  return total;
+}
+
+// src/core/styles.ts
+var FALLBACK_HEADING_STYLES = [
+  ["Heading 1", 1],
+  ["Heading 2", 2],
+  ["Heading 3", 3],
+  ["Heading 4", 4],
+  ["Heading 5", 5],
+  ["Heading 6", 6],
+  ["Title", 1],
+  ["\u6587\u4EF6\u6807\u9898", 1],
+  ["\u6807\u9898 1", 1],
+  ["\u6807\u9898 2", 2],
+  ["\u6807\u9898 3", 3],
+  ["\u6807\u9898 4", 4],
+  ["\u6807\u9898 5", 5],
+  ["\u6807\u9898 6", 6],
+  ["\u6807\u98981", 1],
+  ["\u6807\u98982", 2],
+  ["\u6807\u98983", 3],
+  ["\u6807\u98984", 4],
+  ["\u6807\u98985", 5],
+  ["\u6807\u98986", 6],
+  ["\u4E00\u7EA7\u6807\u9898", 1],
+  ["\u4E8C\u7EA7\u6807\u9898", 2],
+  ["\u4E09\u7EA7\u6807\u9898", 3],
+  ["\u56DB\u7EA7\u6807\u9898", 4],
+  ["\u4E94\u7EA7\u6807\u9898", 5],
+  ["\u516D\u7EA7\u6807\u9898", 6]
+];
+function buildStyleMap(stylesXml, documentXml, normalizeHeadingLevels) {
   const styles = parseStyles(stylesXml);
   const usedIds = /* @__PURE__ */ new Set();
   for (const match of documentXml.matchAll(/<w:pStyle\b[^>]*\bw:val="([^"]*)"/g)) {
-    usedIds.add(decodeXml(match[1]));
+    usedIds.add(decodeXml2(match[1]));
   }
+  const usedStyles = [];
+  for (const id of usedIds) {
+    const style = styles.get(id);
+    if (style)
+      usedStyles.push(style);
+  }
+  const hasFileTitle = usedStyles.some((style) => isFileTitleStyle(style.name));
+  const shift = normalizeHeadingLevels && hasFileTitle;
   const entries = [];
   const seenNames = /* @__PURE__ */ new Set();
   const addEntry = (name, level) => {
@@ -19285,7 +19517,8 @@ function buildStyleMap(stylesXml, documentXml) {
     if (seenNames.has(key))
       return;
     seenNames.add(key);
-    entries.push(`p[style-name='${cleanName}'] => h${level}:fresh`);
+    const effectiveLevel = isFileTitleStyle(cleanName) ? 1 : shift ? Math.min(level + 1, 6) : level;
+    entries.push(`p[style-name='${cleanName}'] => h${effectiveLevel}:fresh`);
   };
   const candidates = usedIds.size > 0 ? Array.from(usedIds) : Array.from(styles.keys());
   for (const id of candidates) {
@@ -19299,7 +19532,7 @@ function buildStyleMap(stylesXml, documentXml) {
   for (const [name, level] of FALLBACK_HEADING_STYLES) {
     addEntry(name, level);
   }
-  return entries;
+  return { entries, shifted: shift };
 }
 function parseStyles(xml) {
   var _a, _b;
@@ -19312,13 +19545,13 @@ function parseStyles(xml) {
     const type = (_a = attrs.match(/\bw:type="([^"]*)"/)) == null ? void 0 : _a[1];
     if (type && type !== "paragraph")
       continue;
-    const id = decodeXml(((_b = attrs.match(/\bw:styleId="([^"]*)"/)) == null ? void 0 : _b[1]) || "");
+    const id = decodeXml2(((_b = attrs.match(/\bw:styleId="([^"]*)"/)) == null ? void 0 : _b[1]) || "");
     if (!id)
       continue;
-    const name = decodeXml(xmlValue(body, "w:name") || "");
+    const name = decodeXml2(xmlValue(body, "w:name") || "");
     const outlineRaw = xmlValue(body, "w:outlineLvl");
     const outline = outlineRaw === void 0 ? void 0 : Number(outlineRaw);
-    const basedOn = decodeXml(xmlValue(body, "w:basedOn") || "") || void 0;
+    const basedOn = decodeXml2(xmlValue(body, "w:basedOn") || "") || void 0;
     styles.set(id, {
       id,
       name,
@@ -19327,11 +19560,6 @@ function parseStyles(xml) {
     });
   }
   return styles;
-}
-function xmlValue(xml, tag) {
-  var _a;
-  const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return (_a = new RegExp(`<${escapedTag}\\b[^>]*\\bw:val="([^"]*)"`).exec(xml)) == null ? void 0 : _a[1];
 }
 function resolveLevel(style, styles, visited) {
   if (visited.has(style.id))
@@ -19361,7 +19589,7 @@ function levelFromName(name) {
   const heading = /^(?:heading|标题)\s*([1-6])(?=$|[_\-\s.])/i.exec(trimmed);
   if (heading)
     return Number(heading[1]);
-  if (/^(?:title|文件标题)(?=$|[_\-\s.])/i.test(trimmed))
+  if (isFileTitleStyle(trimmed))
     return 1;
   const chinese = /^(一级|二级|三级|四级|五级|六级)标题$/.exec(trimmed);
   if (chinese) {
@@ -19369,44 +19597,130 @@ function levelFromName(name) {
   }
   return void 0;
 }
-var FALLBACK_HEADING_STYLES = [
-  ["Heading 1", 1],
-  ["Heading 2", 2],
-  ["Heading 3", 3],
-  ["Heading 4", 4],
-  ["Heading 5", 5],
-  ["Heading 6", 6],
-  ["Title", 1],
-  ["\u6587\u4EF6\u6807\u9898", 1],
-  ["\u6807\u9898 1", 1],
-  ["\u6807\u9898 2", 2],
-  ["\u6807\u9898 3", 3],
-  ["\u6807\u9898 4", 4],
-  ["\u6807\u9898 5", 5],
-  ["\u6807\u9898 6", 6],
-  ["\u6807\u98981", 1],
-  ["\u6807\u98982", 2],
-  ["\u6807\u98983", 3],
-  ["\u6807\u98984", 4],
-  ["\u6807\u98985", 5],
-  ["\u6807\u98986", 6],
-  ["\u4E00\u7EA7\u6807\u9898", 1],
-  ["\u4E8C\u7EA7\u6807\u9898", 2],
-  ["\u4E09\u7EA7\u6807\u9898", 3],
-  ["\u56DB\u7EA7\u6807\u9898", 4],
-  ["\u4E94\u7EA7\u6807\u9898", 5],
-  ["\u516D\u7EA7\u6807\u9898", 6]
-];
-function extractImageExtents(xml) {
+function isFileTitleStyle(name) {
+  return /^(?:title|文件标题)(?=$|[_\-\s.])/i.test(name.trim());
+}
+
+// src/core/docx.ts
+var IMAGE_TOKEN_PREFIX = "sun-daoru-image-";
+var INTERNAL_ANCHOR = /href="#([^"]*)"/g;
+var MAMMOTH_ANCHOR = /^(?:footnote|endnote)(?:-ref)?-\d+$/;
+async function convertDocx(data, options = {}) {
   var _a, _b;
-  const extents = [];
-  for (const match of xml.matchAll(/<wp:extent\b[^>]*>/g)) {
-    const cx = Number((_a = /\bcx="(\d+)"/.exec(match[0])) == null ? void 0 : _a[1]);
-    const cy = Number((_b = /\bcy="(\d+)"/.exec(match[0])) == null ? void 0 : _b[1]);
-    if (Number.isFinite(cx) && cx > 0)
-      extents.push({ cx, cy });
+  assertZip(data);
+  let zip;
+  try {
+    zip = await import_jszip.default.loadAsync(data);
+  } catch (e) {
+    throw new Error("\u65E0\u6CD5\u8BFB\u53D6\u6587\u4EF6\uFF1A\u5B83\u53EF\u80FD\u5DF2\u52A0\u5BC6\u3001\u635F\u574F\uFF0C\u6216\u4E0D\u662F\u771F\u6B63\u7684 .docx \u6587\u4EF6\u3002");
   }
-  return extents;
+  const documentFile = zip.file("word/document.xml");
+  if (!documentFile) {
+    throw new Error("\u8FD9\u4E2A\u6587\u4EF6\u91CC\u6CA1\u6709 Word \u6B63\u6587\uFF0C\u53EF\u80FD\u4E0D\u662F\u6709\u6548\u7684 .docx \u6587\u6863\u3002");
+  }
+  const documentXml = await documentFile.async("string");
+  const stylesFile = zip.file("word/styles.xml");
+  const stylesXml = stylesFile ? await stylesFile.async("string") : "";
+  const styleMap = buildStyleMap(
+    stylesXml,
+    documentXml,
+    Boolean(options.normalizeHeadingLevels)
+  );
+  const images2 = [];
+  const warnings = [];
+  const imageReadFailures = [];
+  let imageIndex = 0;
+  const result2 = await mammoth.convertToHtml(
+    nodeOrBrowserInput(data),
+    {
+      styleMap: styleMap.entries,
+      ignoreEmptyParagraphs: true,
+      convertImage: mammoth.images.imgElement(async (image) => {
+        const index = imageIndex++;
+        const token = `${IMAGE_TOKEN_PREFIX}${index}`;
+        try {
+          const buffer = await image.readAsArrayBuffer();
+          const format = imageFormat(image.contentType);
+          const altText = String(image.altText || "").trim();
+          images2.push({
+            token,
+            data: buffer,
+            contentType: image.contentType || "application/octet-stream",
+            extension: format.extension,
+            previewable: format.previewable,
+            altText: altText || void 0
+          });
+          return { src: token };
+        } catch (e) {
+          imageReadFailures.push(index + 1);
+          return { src: "" };
+        }
+      })
+    }
+  );
+  if (!result2.value.trim()) {
+    throw new Error("\u672A\u80FD\u4ECE\u6587\u6863\u4E2D\u8BFB\u53D6\u6B63\u6587\u5185\u5BB9\u3002");
+  }
+  const html = result2.value;
+  const internalLinks = Array.from(html.matchAll(INTERNAL_ANCHOR)).map((match) => decodeXml2(match[1])).filter((name) => name && !MAMMOTH_ANCHOR.test(name)).length;
+  const losses = await scanLosses(zip, documentXml, { html, internalLinks });
+  const externalImages = (_b = (_a = losses.find((loss) => loss.label === "\u94FE\u63A5\u5230\u6587\u4EF6\u7684\u56FE\u7247")) == null ? void 0 : _a.count) != null ? _b : 0;
+  const extraFailures = Math.max(0, imageReadFailures.length - externalImages);
+  if (extraFailures > 0) {
+    warnings.push(`\u6709 ${extraFailures} \u5F20\u56FE\u7247\u8BFB\u4E0D\u51FA\u5185\u5BB9\uFF0C\u5DF2\u8DF3\u8FC7\u3002`);
+  }
+  const seenMessages = /* @__PURE__ */ new Set();
+  for (const message of result2.messages) {
+    const text = String(message.message || "").trim();
+    if (!text || seenMessages.has(text))
+      continue;
+    if (/unrecognised element was ignored/i.test(text))
+      continue;
+    if (!/image|picture|drawing/i.test(text))
+      continue;
+    const unlikely = /Image of type ([^ ]+) is unlikely to display/i.exec(text);
+    if (unlikely && imageFormat(unlikely[1]).previewable)
+      continue;
+    seenMessages.add(text);
+    warnings.push(text);
+  }
+  return {
+    html,
+    images: images2,
+    warnings,
+    losses,
+    documentXml,
+    styleMapEntries: styleMap.entries.length,
+    headingLevelsShifted: styleMap.shifted,
+    stats: {
+      headings: countMatches(html, /<h[1-6]\b/g),
+      paragraphs: countMatches(html, /<p\b/g),
+      tables: countMatches(html, /<table\b/g),
+      images: images2.length
+    }
+  };
+}
+function assertZip(data) {
+  const bytes = new Uint8Array(data);
+  if (bytes.length < 4) {
+    throw new Error("\u6587\u4EF6\u4E3A\u7A7A\u6216\u5185\u5BB9\u4E0D\u5B8C\u6574\u3002");
+  }
+  const isZip = bytes[0] === 80 && bytes[1] === 75;
+  if (isZip)
+    return;
+  const isOle = bytes[0] === 208 && bytes[1] === 207 && bytes[2] === 17 && bytes[3] === 224;
+  if (isOle) {
+    throw new Error(
+      "\u65E0\u6CD5\u8BFB\u53D6\uFF1A\u6587\u4EF6\u53EF\u80FD\u5DF2\u52A0\u5BC6\uFF0C\u6216\u662F\u65E7\u7248 .doc \u683C\u5F0F\u3002\u8BF7\u53D6\u6D88\u5BC6\u7801\u5E76\u5728 Word/WPS \u4E2D\u53E6\u5B58\u4E3A .docx \u540E\u91CD\u8BD5\u3002"
+    );
+  }
+  throw new Error("\u65E0\u6CD5\u8BFB\u53D6\uFF1A\u8FD9\u4E0D\u662F\u6709\u6548\u7684 .docx \u6587\u4EF6\u3002");
+}
+function nodeOrBrowserInput(data) {
+  if (typeof window === "undefined" && typeof Buffer !== "undefined") {
+    return { buffer: Buffer.from(data) };
+  }
+  return { arrayBuffer: data };
 }
 function imageFormat(contentType) {
   var _a;
@@ -19443,23 +19757,20 @@ function imageFormat(contentType) {
     }
   }
 }
-function decodeXml(value) {
-  return value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
-}
 
 // node_modules/turndown/lib/turndown.browser.es.js
-function extend(destination) {
+function extend(destination2) {
   for (var i = 1; i < arguments.length; i++) {
     var source = arguments[i];
     for (var key in source) {
       if (Object.prototype.hasOwnProperty.call(source, key))
-        destination[key] = source[key];
+        destination2[key] = source[key];
     }
   }
-  return destination;
+  return destination2;
 }
-function repeat(character, count) {
-  return Array(count + 1).join(character);
+function repeat(character, count2) {
+  return Array(count2 + 1).join(character);
 }
 function trimLeadingNewlines(string) {
   return string.replace(/^\n*/, "");
@@ -19695,8 +20006,8 @@ rules.image = {
 function cleanAttribute(attribute) {
   return attribute ? attribute.replace(/(\n+\s*)+/g, "\n") : "";
 }
-function escapeLinkDestination(destination) {
-  var escaped = destination.replace(/([<>()])/g, "\\$1");
+function escapeLinkDestination(destination2) {
+  var escaped = destination2.replace(/([<>()])/g, "\\$1");
   return escaped.indexOf(" ") >= 0 ? "<" + escaped + ">" : escaped;
 }
 function escapeLinkTitle(title) {
@@ -20205,6 +20516,7 @@ function cell(content, node) {
 // src/core/markdown.ts
 function htmlToMarkdown(html, images2) {
   const warnings = [];
+  const losses = [];
   const imageByToken = new Map(images2.map((image) => [image.token, image]));
   let simpleTables = 0;
   let complexTables = 0;
@@ -20220,6 +20532,8 @@ function htmlToMarkdown(html, images2) {
     linkStyle: "inlined"
   });
   service.use(strikethrough);
+  const defaultEscape = service.escape.bind(service);
+  service.escape = (text) => defaultEscape(text).replace(/</g, "&lt;");
   service.remove([
     "script",
     "style",
@@ -20234,9 +20548,19 @@ function htmlToMarkdown(html, images2) {
     "select",
     "option"
   ]);
-  service.addRule("sunDaoruUnsafeLink", {
-    filter: (node) => node.nodeName === "A" && isUnsafeHref(node.getAttribute("href")),
-    replacement: (content) => content
+  service.addRule("sunDaoruLink", {
+    filter: "a",
+    replacement: (content, node) => {
+      const href = (node.getAttribute("href") || "").trim();
+      const label = content.replace(/\s+/g, " ").trim();
+      if (!href || href.startsWith("#") || isUnsafeHref(href))
+        return content;
+      if (!label)
+        return content;
+      if (label.startsWith("[") && label.endsWith(")"))
+        return content;
+      return `[${label}](${escapeHref(href)})`;
+    }
   });
   service.addRule("sunDaoruImage", {
     filter: (node) => node.nodeName === "IMG" && (node.getAttribute("src") || "").startsWith(IMAGE_TOKEN_PREFIX),
@@ -20247,12 +20571,10 @@ function htmlToMarkdown(html, images2) {
         unresolvedImages++;
         return "";
       }
-      if (image.previewable) {
-        const width = image.widthPx ? `|${image.widthPx}` : "";
-        return `![[${image.link}${width}]]`;
-      }
-      const alt = cleanAlt(node.getAttribute("alt") || "\u539F\u56FE");
-      return `[[${image.link}|${alt}]]`;
+      const alt = cleanAlt(node.getAttribute("alt") || image.altText || "");
+      if (!image.previewable)
+        return `[${alt || "\u539F\u56FE"}](${destination(image.link)})`;
+      return imageEmbed(image.link, alt);
     }
   });
   service.addRule("sunDaoruTable", {
@@ -20284,6 +20606,22 @@ ${result2.html}
     filter: "br",
     replacement: () => "<br>\n"
   });
+  service.addRule("sunDaoruCodeBlock", {
+    filter: "pre",
+    replacement: (_content, node) => {
+      const text = (node.textContent || "").replace(/\s+$/, "");
+      if (!text.trim())
+        return "";
+      const fence = text.includes("```") ? "````" : "```";
+      return `
+
+${fence}
+${text}
+${fence}
+
+`;
+    }
+  });
   service.addRule("sunDaoruUnderline", {
     filter: "u",
     replacement: (content) => `<u>${content}</u>`
@@ -20296,24 +20634,40 @@ ${result2.html}
     filter: "sub",
     replacement: (content) => `<sub>${content}</sub>`
   });
-  service.addRule("sunDaoruHighlight", {
-    filter: "mark",
-    replacement: (content) => `==${content}==`
-  });
   let markdown = service.turndown(html);
   markdown = cleanMarkdown(markdown);
   if (tableImages > 0) {
-    warnings.push(
-      `\u590D\u6742\u8868\u683C\u5185\u6709 ${tableImages} \u5904\u56FE\u7247\uFF0C\u5DF2\u4FDD\u7559\u4E3A\u5D4C\u5165\u8BED\u6CD5\u6587\u672C\uFF1BObsidian \u4E0D\u4E00\u5B9A\u4F1A\u76F4\u63A5\u5728 HTML \u8868\u683C\u4E2D\u6E32\u67D3\u3002`
-    );
+    losses.push({
+      kind: "info",
+      label: "HTML \u8868\u683C\u91CC\u7684\u56FE\u7247",
+      count: tableImages,
+      detail: "\u8868\u683C\u662F HTML \u5757\uFF0C\u6807\u51C6\u56FE\u7247\u8BED\u6CD5\u8FDB\u4E0D\u53BB\uFF0C\u7528 <img> \u6807\u7B7E\u4FDD\u7559\u3002"
+    });
   }
   if (unresolvedImages > 0) {
-    warnings.push(`\u6709 ${unresolvedImages} \u5F20\u56FE\u7247\u672A\u80FD\u5339\u914D\u5230\u9644\u4EF6\uFF0C\u5DF2\u4ECE\u6B63\u6587\u4E2D\u79FB\u9664\u3002`);
+    losses.push({
+      kind: "lost",
+      label: "\u627E\u4E0D\u5230\u9644\u4EF6\u7684\u56FE\u7247\u5F15\u7528",
+      count: unresolvedImages,
+      detail: "\u8FD9\u4E9B\u56FE\u7247\u6CA1\u6709\u5BF9\u5E94\u7684\u56FE\u7247\u6570\u636E\uFF0C\u5DF2\u4ECE\u6B63\u6587\u79FB\u9664\u3002"
+    });
   }
   if (markdown.includes(IMAGE_TOKEN_PREFIX)) {
     warnings.push("\u6B63\u6587\u4E2D\u6B8B\u7559\u4E86\u56FE\u7247\u5360\u4F4D\u7B26\uFF0C\u8BF7\u628A\u6587\u6863\u53D1\u7ED9\u5F00\u53D1\u8005\u6392\u67E5\u3002");
   }
-  return { markdown, simpleTables, complexTables, warnings };
+  return { markdown, simpleTables, complexTables, warnings, losses };
+}
+function imageEmbed(link, alt) {
+  if (/^\d+(?:x\d+)?$/.test(alt))
+    return htmlImage(link, alt);
+  return `![${alt}](${destination(link)})`;
+}
+function destination(path) {
+  const clean2 = path.replace(/</g, "%3C").replace(/>/g, "%3E");
+  return /[\s()]/.test(clean2) ? `<${clean2}>` : clean2;
+}
+function htmlImage(link, alt) {
+  return `<img src="${escapeAttribute(link)}" alt="${escapeAttribute(alt)}">`;
 }
 function isSimpleTable(table) {
   if (table.querySelector("table"))
@@ -20385,7 +20739,7 @@ function complexTableToHtml(table, imageByToken) {
   return { html: clone2.outerHTML, images: images2 };
 }
 function replaceTableImages(root3, imageByToken) {
-  let count = 0;
+  let count2 = 0;
   for (const image of Array.from(root3.querySelectorAll("img"))) {
     const token = image.getAttribute("src") || "";
     const pending = imageByToken.get(token);
@@ -20393,26 +20747,29 @@ function replaceTableImages(root3, imageByToken) {
     if (!parent)
       continue;
     const doc = image.ownerDocument;
-    const blank = doc.createTextNode(" ");
-    const breakBefore = doc.createElement("br");
-    const breakAfter = doc.createElement("br");
+    const alt = cleanAlt(image.getAttribute("alt") || (pending == null ? void 0 : pending.altText) || "");
     let text;
-    if (pending && pending.link) {
-      const alt = cleanAlt(image.getAttribute("alt") || "\u539F\u56FE");
+    if ((pending == null ? void 0 : pending.link) && pending.previewable) {
+      const element = doc.createElement("img");
+      element.setAttribute("src", pending.link);
+      element.setAttribute("alt", alt);
+      text = element;
+      count2++;
+    } else if (pending == null ? void 0 : pending.link) {
       text = doc.createTextNode(
-        pending.previewable ? `![[${pending.link}]]` : `[[${pending.link}|${alt}]]`
+        `${alt || "\u56FE\u7247"}\uFF08${pending.link}\uFF0C\u8FD9\u79CD\u683C\u5F0F\u65E0\u6CD5\u9884\u89C8\uFF0C\u5DF2\u4FDD\u5B58\u539F\u6587\u4EF6\uFF09`
       );
-      count++;
+      count2++;
     } else {
       text = doc.createTextNode("\uFF08\u56FE\u7247\u7F3A\u5931\uFF09");
     }
-    parent.insertBefore(blank, image);
-    parent.insertBefore(breakBefore, image);
+    parent.insertBefore(doc.createTextNode(" "), image);
+    parent.insertBefore(doc.createElement("br"), image);
     parent.insertBefore(text, image);
-    parent.insertBefore(breakAfter, image);
+    parent.insertBefore(doc.createElement("br"), image);
     parent.removeChild(image);
   }
-  return count;
+  return count2;
 }
 var ALLOWED_TABLE_TAGS = /* @__PURE__ */ new Set([
   "table",
@@ -20436,6 +20793,7 @@ var ALLOWED_TABLE_TAGS = /* @__PURE__ */ new Set([
   "sup",
   "sub",
   "a",
+  "img",
   "ol",
   "ul",
   "li",
@@ -20474,6 +20832,8 @@ function sanitizeTable(root3) {
       continue;
     }
     const href = tag === "a" ? element.getAttribute("href") : null;
+    const src = tag === "img" ? element.getAttribute("src") : null;
+    const alt = tag === "img" ? element.getAttribute("alt") : null;
     const colspan = element.getAttribute("colspan");
     const rowspan = element.getAttribute("rowspan");
     for (const attr of Array.from(element.attributes)) {
@@ -20481,6 +20841,12 @@ function sanitizeTable(root3) {
     }
     if (tag === "a" && href && !isUnsafeHref(href)) {
       element.setAttribute("href", href.trim());
+    }
+    if (tag === "img") {
+      if (src)
+        element.setAttribute("src", src.trim());
+      if (alt)
+        element.setAttribute("alt", alt);
     }
     if (tag === "td" || tag === "th") {
       if (colspan && /^\d+$/.test(colspan) && Number(colspan) > 1) {
@@ -20511,14 +20877,39 @@ function isUnsafeHref(href) {
   const value = href.trim().toLowerCase().replace(/[\u0000-\u001f]/g, "");
   if (!value)
     return false;
-  return /^(?:javascript|vbscript|data|file):/.test(value) || value.startsWith("#");
+  return /^(?:javascript|vbscript|data|file):/.test(value);
 }
 function cleanAlt(value) {
-  const clean = value.replace(/[|[\]]/g, " ").replace(/\s+/g, " ").trim();
-  return clean || "\u539F\u56FE";
+  return value.replace(/[|[\]]/g, " ").replace(/\s+/g, " ").trim();
+}
+function escapeHref(href) {
+  return href.replace(
+    /[ ()<>"`]/g,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0")}`
+  );
+}
+function escapeAttribute(value) {
+  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 function cleanMarkdown(markdown) {
   return markdown.replace(/\u00a0/g, " ").replace(/[\u200b-\u200d\u2060\ufeff]/g, "").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
+}
+
+// src/core/relative-path.ts
+function relativePathFrom(fromFolder, toPath3) {
+  const from = clean(fromFolder);
+  const to = clean(toPath3);
+  const fromSegments = from ? from.split("/") : [];
+  const toSegments = to.split("/");
+  let common = 0;
+  while (common < fromSegments.length && common < toSegments.length - 1 && fromSegments[common] === toSegments[common]) {
+    common++;
+  }
+  const up = fromSegments.length - common;
+  return "../".repeat(up) + toSegments.slice(common).join("/");
+}
+function clean(path) {
+  return path.replace(/\\/g, "/").replace(/\/{2,}/g, "/").replace(/^\/+|\/+$/g, "");
 }
 
 // src/paths.ts
@@ -20534,6 +20925,21 @@ function sanitizeBaseName(raw) {
     base = `\u5BFC\u5165-${base}`;
   }
   return base;
+}
+function sanitizeFolderName(raw) {
+  let name = raw.replace(/[\\/:*?"<>|#^\[\]]/g, "-").replace(/[\u0000-\u001f]/g, "").replace(/\s+/g, " ").trim().replace(/[. ]+$/g, "");
+  if (!name)
+    name = "\u672A\u547D\u540D";
+  const characters = Array.from(name);
+  if (characters.length > 80)
+    name = characters.slice(0, 80).join("").trim();
+  if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(name)) {
+    name = `\u5BFC\u5165-${name}`;
+  }
+  return name;
+}
+function sanitizeRelativeFolder(relative) {
+  return relative.replace(/\\/g, "/").split("/").filter(Boolean).map(sanitizeFolderName).join("/");
 }
 function joinVaultPath(folder, name) {
   const cleanFolder = (0, import_obsidian.normalizePath)(folder || "").replace(/^\/+|\/+$/g, "");
@@ -20596,67 +21002,116 @@ function formatLocalDate(date = /* @__PURE__ */ new Date()) {
 
 // src/importer.ts
 async function importFiles(app, files, request, settings, onProgress) {
-  if (request.target === "insert" && files.length > 1) {
+  return importItems(
+    app,
+    files.map((file) => ({ file })),
+    request,
+    settings,
+    onProgress
+  );
+}
+async function importItems(app, items, request, settings, onProgress) {
+  if (request.target === "insert" && items.length > 1) {
     throw new Error("\u63D2\u5165\u5F53\u524D\u7B14\u8BB0\u4E00\u6B21\u53EA\u80FD\u5904\u7406\u4E00\u4E2A\u6587\u4EF6\u3002");
   }
   const results = [];
-  for (let index = 0; index < files.length; index++) {
-    const file = files[index];
-    const prefix = files.length > 1 ? `(${index + 1}/${files.length}) ` : "";
+  for (let index = 0; index < items.length; index++) {
+    const prefix = items.length > 1 ? `(${index + 1}/${items.length}) ` : "";
     results.push(
-      await importSingleFile(app, file, request, settings, onProgress, prefix)
+      await importSingleFile(
+        app,
+        items[index],
+        request,
+        settings,
+        onProgress,
+        prefix
+      )
     );
   }
   return results;
 }
-async function importSingleFile(app, file, request, settings, onProgress, prefix) {
+async function importSingleFile(app, item, request, settings, onProgress, prefix) {
+  const file = item.file;
   const fileName = file.name;
+  const displayName = item.relativePath || fileName;
   const result2 = {
-    fileName,
+    fileName: displayName,
     inserted: false,
     images: 0,
     simpleTables: 0,
     complexTables: 0,
-    warnings: []
+    warnings: [],
+    losses: []
   };
   const createdAttachments = [];
   try {
     assertSupportedFile(fileName);
-    onProgress(`${prefix}\u6B63\u5728\u8BFB\u53D6 ${fileName}\u2026`);
+    onProgress(`${prefix}\u6B63\u5728\u8BFB\u53D6 ${displayName}\u2026`);
     const data = await file.arrayBuffer();
     onProgress(`${prefix}\u6B63\u5728\u89E3\u6790 Word\uFF08\u5927\u6587\u6863\u53EF\u80FD\u9700\u8981\u4E00\u4F1A\u513F\uFF09\u2026`);
-    const conversion = await convertDocx(data);
+    const conversion = await convertDocx(data, {
+      normalizeHeadingLevels: settings.normalizeHeadingLevels
+    });
+    if (settings.normalizeHeadingLevels && !conversion.headingLevelsShifted) {
+      conversion.warnings.push(
+        "\u5DF2\u5F00\u542F\u6807\u9898\u5C42\u7EA7\u6574\u7406\uFF0C\u4F46\u6587\u6863\u91CC\u6CA1\u6709\u68C0\u6D4B\u5230\u300C\u6587\u4EF6\u6807\u9898 / Title\u300D\u6837\u5F0F\uFF0C\u6807\u9898\u5C42\u7EA7\u672A\u8C03\u6574\u3002"
+      );
+    }
     const baseName = sanitizeBaseName(fileName);
+    let targetFolder = (0, import_obsidian2.normalizePath)(request.folder || "");
+    if (item.relativePath) {
+      const relativeDir = item.relativePath.replace(/\\/g, "/").split("/").slice(0, -1).join("/");
+      const safeRelative = sanitizeRelativeFolder(relativeDir);
+      if (safeRelative)
+        targetFolder = joinVaultPath(targetFolder, safeRelative);
+    }
     let notePath;
     if (request.target === "new") {
-      const folder = (0, import_obsidian2.normalizePath)(request.folder || "");
-      await ensureFolder(app, folder);
-      notePath = await uniqueFilePath(app, folder, baseName, ".md");
+      await ensureFolder(app, targetFolder);
+      notePath = await uniqueFilePath(app, targetFolder, baseName, ".md");
       result2.notePath = notePath;
     }
     const attachmentSourcePath = request.target === "new" ? notePath || "" : request.activeFilePath;
     const imageBase = baseName.slice(0, 60).replace(/[. ]+$/g, "") || "\u5BFC\u5165";
+    const noteBase = notePath ? notePath.slice(notePath.lastIndexOf("/") + 1).replace(/\.md$/i, "") : "";
+    const groupBase = (request.target === "new" ? noteBase : imageBase).slice(0, 60).replace(/[. ]+$/g, "") || imageBase;
     const totalImages = conversion.images.length;
+    const noteFolder = request.target === "new" ? parentFolderOf(notePath || "") : parentFolderOf(request.activeFilePath);
+    let groupingFolder = "";
+    if (settings.groupAttachmentsByNote && totalImages > 0) {
+      groupingFolder = joinVaultPath(noteFolder, `${groupBase}-\u9644\u4EF6`);
+      await ensureFolder(app, groupingFolder);
+    }
     for (let index = 0; index < totalImages; index++) {
       const image = conversion.images[index];
       const ordinal = String(index + 1).padStart(3, "0");
-      const attachmentName = `${imageBase}-${ordinal}.${image.extension}`;
-      const attachmentPath = await resolveAttachmentPath(
-        app,
-        attachmentName,
-        attachmentSourcePath,
-        settings
-      );
-      await ensureFolder(app, parentFolderOf(attachmentPath));
+      let attachmentPath;
+      if (groupingFolder) {
+        attachmentPath = await uniqueFilePath(
+          app,
+          groupingFolder,
+          ordinal,
+          image.extension
+        );
+      } else {
+        const attachmentName = `${imageBase}-${ordinal}.${image.extension}`;
+        attachmentPath = await resolveAttachmentPath(
+          app,
+          attachmentName,
+          attachmentSourcePath,
+          settings
+        );
+        await ensureFolder(app, parentFolderOf(attachmentPath));
+      }
       const created = await app.vault.createBinary(attachmentPath, image.data);
-      image.link = created.path;
+      image.link = relativePathFrom(noteFolder, created.path);
       createdAttachments.push(created);
       if (index === 0 || (index + 1) % 10 === 0 || index + 1 === totalImages) {
         onProgress(`${prefix}\u6B63\u5728\u4FDD\u5B58\u56FE\u7247 ${index + 1}/${totalImages}\u2026`);
       }
     }
     const markdownResult = htmlToMarkdown(conversion.html, conversion.images);
-    const markdown = request.target === "new" && request.addSourceFrontmatter ? withSourceFrontmatter(markdownResult.markdown, fileName) : markdownResult.markdown;
+    const markdown = request.target === "new" && request.addSourceFrontmatter ? withSourceFrontmatter(markdownResult.markdown, displayName) : markdownResult.markdown;
     if (request.target === "insert") {
       if (!request.editor) {
         throw new Error("\u5F53\u524D\u6CA1\u6709\u6253\u5F00\u7684 Markdown \u7B14\u8BB0\uFF0C\u65E0\u6CD5\u63D2\u5165\u3002");
@@ -20674,17 +21129,41 @@ async function importSingleFile(app, file, request, settings, onProgress, prefix
     result2.simpleTables = markdownResult.simpleTables;
     result2.complexTables = markdownResult.complexTables;
     result2.warnings.push(...conversion.warnings, ...markdownResult.warnings);
-    const nonPreviewable = conversion.images.filter((image) => !image.previewable).length;
-    if (nonPreviewable > 0) {
-      result2.warnings.push(
-        `${nonPreviewable} \u5F20\u56FE\u7247\uFF08\u5982 EMF/WMF/TIFF\uFF09Obsidian \u65E0\u6CD5\u9884\u89C8\uFF0C\u5DF2\u4FDD\u5B58\u539F\u6587\u4EF6\u5E76\u4EE5\u94FE\u63A5\u5F62\u5F0F\u63D2\u5165\u3002`
-      );
-    }
+    const nonPreviewable = conversion.images.filter(
+      (image) => !image.previewable
+    ).length;
+    const withAlt = conversion.images.filter((image) => image.altText).length;
+    const unknownLoss = checkTextFidelity(
+      conversion.documentXml,
+      markdownResult.markdown
+    );
+    result2.losses = [
+      ...conversion.losses,
+      ...markdownResult.losses,
+      ...unknownLoss ? [unknownLoss] : [],
+      ...nonPreviewable > 0 ? [
+        {
+          kind: "downgraded",
+          label: "Obsidian \u663E\u793A\u4E0D\u4E86\u7684\u56FE\u7247\u683C\u5F0F",
+          count: nonPreviewable,
+          detail: "EMF/WMF/TIFF \u7B49\u539F\u6587\u4EF6\u5DF2\u4FDD\u5B58\uFF0C\u6B63\u6587\u91CC\u6539\u6210\u6307\u5411\u9644\u4EF6\u7684\u94FE\u63A5\u3002"
+        }
+      ] : [],
+      ...withAlt > 0 ? [
+        {
+          kind: "info",
+          label: "\u56FE\u7247\u66FF\u4EE3\u6587\u5B57",
+          count: withAlt,
+          detail: "\u5DF2\u4F5C\u4E3A\u56FE\u7247\u7684\u66FF\u4EE3\u6587\u5B57\uFF08alt\uFF09\u5199\u51FA\uFF0C\u9875\u9762\u4E0A\u4E0D\u663E\u793A\u3002"
+        }
+      ] : []
+    ];
     return result2;
   } catch (error) {
     await cleanupAttachments(app, createdAttachments);
-    result2.error = errorMessage(error);
+    result2.error = describeError(error);
     result2.warnings = [];
+    result2.losses = [];
     return result2;
   }
 }
@@ -20700,7 +21179,7 @@ async function resolveAttachmentPath(app, fileName, sourcePath, settings) {
   const { base, extension } = splitAttachmentName(fileName);
   if (settings.attachmentMode === "custom") {
     const folder = (0, import_obsidian2.normalizePath)(
-      settings.customAttachmentFolder.trim() || "\u9644\u4EF6/Word \u5BFC\u5165"
+      settings.customAttachmentFolder.trim() || "\u9644\u4EF6/\u5BFC\u5165"
     );
     await ensureFolder(app, folder);
     return uniqueFilePath(app, folder, base, extension);
@@ -20716,10 +21195,10 @@ async function resolveAttachmentPath(app, fileName, sourcePath, settings) {
     return uniqueFilePath(app, folder, base, extension);
   }
 }
-function withSourceFrontmatter(markdown, fileName) {
+function withSourceFrontmatter(markdown, sourceName) {
   const frontmatter = [
     "---",
-    `source: ${JSON.stringify(fileName)}`,
+    `source: ${JSON.stringify(sourceName)}`,
     `imported: ${formatLocalDate()}`,
     "---"
   ].join("\n");
@@ -20735,18 +21214,15 @@ async function cleanupAttachments(app, files) {
     }
   }
 }
-function errorMessage(error) {
-  if (error instanceof Error && error.message)
-    return error.message;
-  return String(error) || "\u672A\u77E5\u9519\u8BEF";
-}
 
 // src/settings.ts
 var import_obsidian3 = require("obsidian");
 var DEFAULT_SETTINGS = {
   defaultTarget: "new",
   attachmentMode: "obsidian",
-  customAttachmentFolder: "\u9644\u4EF6/Word \u5BFC\u5165",
+  customAttachmentFolder: "\u9644\u4EF6/\u5BFC\u5165",
+  groupAttachmentsByNote: true,
+  normalizeHeadingLevels: false,
   addSourceFrontmatter: false,
   openAfterImport: true
 };
@@ -20759,27 +21235,46 @@ var SunDaoruSettingTab = class extends import_obsidian3.PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
     new import_obsidian3.Setting(containerEl).setName("\u5BFC\u5165").setHeading();
-    new import_obsidian3.Setting(containerEl).setName("\u9ED8\u8BA4\u5BFC\u5165\u65B9\u5F0F").setDesc("\u65B0\u5EFA\u7B14\u8BB0\uFF0C\u6216\u63D2\u5165\u5F53\u524D\u6253\u5F00\u7684 Markdown \u7B14\u8BB0\u3002\u6279\u91CF\u5BFC\u5165\u65F6\u59CB\u7EC8\u65B0\u5EFA\u7B14\u8BB0\u3002").addDropdown(
+    new import_obsidian3.Setting(containerEl).setName("\u9ED8\u8BA4\u5BFC\u5165\u65B9\u5F0F").setDesc("\u65B0\u5EFA\u7B14\u8BB0\uFF0C\u6216\u63D2\u5165\u5F53\u524D\u6253\u5F00\u7684 Markdown \u7B14\u8BB0\u3002\u6279\u91CF\u5BFC\u5165\u548C\u6587\u4EF6\u5939\u5BFC\u5165\u59CB\u7EC8\u65B0\u5EFA\u7B14\u8BB0\u3002").addDropdown(
       (dropdown) => dropdown.addOption("new", "\u65B0\u5EFA\u7B14\u8BB0").addOption("insert", "\u63D2\u5165\u5F53\u524D\u7B14\u8BB0").setValue(this.plugin.settings.defaultTarget).onChange(async (value) => {
         this.plugin.settings.defaultTarget = value;
         await this.plugin.saveSettings();
       })
     );
-    new import_obsidian3.Setting(containerEl).setName("\u9644\u4EF6\u4F4D\u7F6E").setDesc("\u56FE\u7247\u7B49\u9644\u4EF6\u653E\u5728\u54EA\u91CC\u3002\u8DDF\u968F Obsidian \u8BBE\u7F6E\u65F6\uFF0C\u4F1A\u4F7F\u7528\u300C\u6587\u4EF6\u4E0E\u94FE\u63A5\u300D\u4E2D\u7684\u9644\u4EF6\u4FDD\u5B58\u4F4D\u7F6E\u3002").addDropdown(
-      (dropdown) => dropdown.addOption("obsidian", "\u8DDF\u968F Obsidian \u8BBE\u7F6E").addOption("custom", "\u56FA\u5B9A\u6587\u4EF6\u5939").setValue(this.plugin.settings.attachmentMode).onChange(async (value) => {
-        this.plugin.settings.attachmentMode = value;
+    new import_obsidian3.Setting(containerEl).setName("\u6309\u6587\u6863\u5EFA\u9644\u4EF6\u5B50\u6587\u4EF6\u5939").setDesc(
+      "\u5F00\u542F\u65F6\u56FE\u7247\u653E\u5230\u7B14\u8BB0\u540C\u76EE\u5F55\u7684\u300C<\u6587\u6863\u540D>-\u9644\u4EF6/\u300D\uFF1B\u63D2\u5165\u5F53\u524D\u7B14\u8BB0\u65F6\u653E\u5230\u5F53\u524D\u7B14\u8BB0\u76EE\u5F55\u4E0B\u3002\u5173\u95ED\u540E\u6539\u7528\u4E0B\u9762\u7684\u9644\u4EF6\u4F4D\u7F6E\u8BBE\u7F6E\u3002"
+    ).addToggle(
+      (toggle) => toggle.setValue(this.plugin.settings.groupAttachmentsByNote).onChange(async (value) => {
+        this.plugin.settings.groupAttachmentsByNote = value;
         await this.plugin.saveSettings();
         this.display();
       })
     );
+    new import_obsidian3.Setting(containerEl).setName("\u9644\u4EF6\u4F4D\u7F6E").setDesc(
+      this.plugin.settings.groupAttachmentsByNote ? "\u5F53\u524D\u7531\u300C\u6309\u6587\u6863\u5EFA\u9644\u4EF6\u5B50\u6587\u4EF6\u5939\u300D\u63A5\u7BA1\uFF1B\u5173\u95ED\u8BE5\u5F00\u5173\u540E\u6B64\u8BBE\u7F6E\u751F\u6548\u3002" : "\u56FE\u7247\u7B49\u9644\u4EF6\u653E\u5728\u54EA\u91CC\u3002\u8DDF\u968F Obsidian \u8BBE\u7F6E\u65F6\uFF0C\u4F1A\u4F7F\u7528\u300C\u6587\u4EF6\u4E0E\u94FE\u63A5\u300D\u4E2D\u7684\u9644\u4EF6\u4FDD\u5B58\u4F4D\u7F6E\u3002"
+    ).setDisabled(this.plugin.settings.groupAttachmentsByNote).addDropdown(
+      (dropdown) => dropdown.addOption("obsidian", "\u8DDF\u968F Obsidian \u8BBE\u7F6E").addOption("custom", "\u56FA\u5B9A\u6587\u4EF6\u5939").setValue(this.plugin.settings.attachmentMode).onChange(async (value) => {
+        this.plugin.settings.attachmentMode = value;
+        await this.plugin.saveSettings();
+        this.display();
+      }).setDisabled(this.plugin.settings.groupAttachmentsByNote)
+    );
     if (this.plugin.settings.attachmentMode === "custom") {
-      new import_obsidian3.Setting(containerEl).setName("\u9644\u4EF6\u6587\u4EF6\u5939").setDesc("\u76F8\u5BF9\u4E8E\u5E93\u6839\u76EE\u5F55\uFF0C\u4F8B\u5982\u300C\u9644\u4EF6/Word \u5BFC\u5165\u300D\u3002\u4E0D\u5B58\u5728\u7684\u6587\u4EF6\u5939\u4F1A\u81EA\u52A8\u521B\u5EFA\u3002").addText(
-        (text) => text.setPlaceholder("\u9644\u4EF6/Word \u5BFC\u5165").setValue(this.plugin.settings.customAttachmentFolder).onChange(async (value) => {
+      new import_obsidian3.Setting(containerEl).setName("\u9644\u4EF6\u6587\u4EF6\u5939").setDesc("\u76F8\u5BF9\u4E8E\u5E93\u6839\u76EE\u5F55\uFF0C\u4F8B\u5982\u300C\u9644\u4EF6/\u5BFC\u5165\u300D\u3002\u4E0D\u5B58\u5728\u7684\u6587\u4EF6\u5939\u4F1A\u81EA\u52A8\u521B\u5EFA\u3002").setDisabled(this.plugin.settings.groupAttachmentsByNote).addText(
+        (text) => text.setPlaceholder("\u9644\u4EF6/\u5BFC\u5165").setValue(this.plugin.settings.customAttachmentFolder).onChange(async (value) => {
           this.plugin.settings.customAttachmentFolder = value.trim() || DEFAULT_SETTINGS.customAttachmentFolder;
           await this.plugin.saveSettings();
-        })
+        }).setDisabled(this.plugin.settings.groupAttachmentsByNote)
       );
     }
+    new import_obsidian3.Setting(containerEl).setName("\u6574\u7406\u6807\u9898\u5C42\u7EA7").setDesc(
+      "\u68C0\u6D4B\u5230\u300C\u6587\u4EF6\u6807\u9898 / Title\u300D\u6837\u5F0F\u65F6\uFF0C\u628A\u5176\u4F59\u6807\u9898\u6574\u4F53\u4E0B\u79FB\u4E00\u7EA7\u3002\u53EA\u5BF9\u201C\u4E00\u4E2A\u6587\u4EF6\u6807\u9898 + \u591A\u7EA7\u7AE0\u8282\u201D\u7684\u6587\u6863\u6709\u6548\uFF0C\u9ED8\u8BA4\u5173\u95ED\u3002"
+    ).addToggle(
+      (toggle) => toggle.setValue(this.plugin.settings.normalizeHeadingLevels).onChange(async (value) => {
+        this.plugin.settings.normalizeHeadingLevels = value;
+        await this.plugin.saveSettings();
+      })
+    );
     new import_obsidian3.Setting(containerEl).setName("\u65B0\u5EFA\u7B14\u8BB0\u65F6\u5199\u5165\u6765\u6E90\u4FE1\u606F").setDesc("\u5728\u7B14\u8BB0\u5F00\u5934\u5199\u5165 source\uFF08\u539F\u6587\u4EF6\u540D\uFF09\u548C imported\uFF08\u5BFC\u5165\u65E5\u671F\uFF09\u3002").addToggle(
       (toggle) => toggle.setValue(this.plugin.settings.addSourceFrontmatter).onChange(async (value) => {
         this.plugin.settings.addSourceFrontmatter = value;
@@ -20797,7 +21292,10 @@ var SunDaoruSettingTab = class extends import_obsidian3.PluginSettingTab {
       text: "\u4EC5\u652F\u6301 .docx / .docm\u3002\u65E7\u7248 .doc \u8BF7\u5148\u5728 Word \u6216 WPS \u4E2D\u53E6\u5B58\u4E3A .docx\u3002"
     });
     note.createEl("p", {
-      text: "\u5B57\u4F53\u3001\u5B57\u53F7\u3001\u989C\u8272\u3001\u5BF9\u9F50\u3001\u9875\u8FB9\u8DDD\u3001\u9875\u7709\u9875\u811A\u7B49\u6392\u7248\u4FE1\u606F\u4E0D\u4F1A\u5BFC\u5165\uFF1B\u590D\u6742\u8868\u683C\u4F1A\u4FDD\u7559\u4E3A HTML\u3002"
+      text: "\u5B57\u4F53\u3001\u5B57\u53F7\u3001\u989C\u8272\u3001\u5BF9\u9F50\u3001\u9875\u8FB9\u8DDD\u7B49\u6392\u7248\u4FE1\u606F\u4E0D\u4F1A\u5BFC\u5165\uFF1B\u590D\u6742\u8868\u683C\u4FDD\u7559\u4E3A HTML\u3002\u9875\u7709\u9875\u811A\u3001\u6279\u6CE8\u3001\u516C\u5F0F\u7B49\u771F\u6B63\u4E22\u6389\u7684\u5185\u5BB9\u4F1A\u5728\u5BFC\u5165\u7ED3\u679C\u91CC\u9010\u9879\u5217\u51FA\u3002"
+    });
+    note.createEl("p", {
+      text: "\u6587\u4EF6\u5939\u5BFC\u5165\u4F1A\u4FDD\u7559\u6E90\u6587\u4EF6\u5939\u540D\u548C\u5185\u90E8\u5C42\u7EA7\uFF0C\u7A7A\u6587\u4EF6\u5939\u4E0E\u975E Word \u6587\u4EF6\u8DF3\u8FC7\u3002"
     });
   }
 };
@@ -20805,15 +21303,16 @@ var SunDaoruSettingTab = class extends import_obsidian3.PluginSettingTab {
 // src/ui/import-options-modal.ts
 var import_obsidian4 = require("obsidian");
 var ImportOptionsModal = class extends import_obsidian4.Modal {
-  constructor(app, files, config) {
+  constructor(app, files, displayNames, config) {
     super(app);
     this.resolveResult = null;
     this.settled = false;
     this.folderSetting = null;
     this.sourceSetting = null;
     this.files = files;
+    this.displayNames = displayNames;
     this.config = config;
-    this.canInsert = config.canInsert && files.length === 1;
+    this.canInsert = config.canInsert && files.length === 1 && !config.folderMode;
     this.target = config.defaultTarget === "insert" && this.canInsert ? "insert" : "new";
     this.folder = config.defaultFolder;
     this.addSourceFrontmatter = config.addSourceFrontmatter;
@@ -20828,16 +21327,23 @@ var ImportOptionsModal = class extends import_obsidian4.Modal {
     const { contentEl } = this;
     this.modalEl.addClass("sun-daoru-modal");
     contentEl.empty();
-    contentEl.createEl("h2", { text: "\u5BFC\u5165 Word" });
+    contentEl.createEl("h2", {
+      text: this.config.title || (this.config.folderMode ? "\u5BFC\u5165 Word \u6587\u4EF6\u5939" : "\u5BFC\u5165 Word")
+    });
     const totalBytes = this.files.reduce((sum, file) => sum + file.size, 0);
     contentEl.createEl("p", {
       cls: "sun-daoru-modal-summary",
-      text: this.files.length === 1 ? `\u5DF2\u9009\u62E9 1 \u4E2A\u6587\u4EF6\uFF08${formatBytes(totalBytes)}\uFF09` : `\u5DF2\u9009\u62E9 ${this.files.length} \u4E2A\u6587\u4EF6\uFF08\u5171 ${formatBytes(totalBytes)}\uFF09`
+      text: this.config.folderMode ? `\u5DF2\u9009\u62E9 ${this.files.length} \u4E2A Word \u6587\u4EF6\uFF08\u5171 ${formatBytes(totalBytes)}\uFF09` : this.files.length === 1 ? `\u5DF2\u9009\u62E9 1 \u4E2A\u6587\u4EF6\uFF08${formatBytes(totalBytes)}\uFF09` : `\u5DF2\u9009\u62E9 ${this.files.length} \u4E2A\u6587\u4EF6\uFF08\u5171 ${formatBytes(totalBytes)}\uFF09`
     });
     const fileList = contentEl.createDiv({ cls: "sun-daoru-file-list" });
-    for (const file of this.files.slice(0, 6)) {
+    for (const [index, file] of this.files.slice(0, 6).entries()) {
+      const displayName = this.displayNames[index] || file.name;
       const row = fileList.createDiv({ cls: "sun-daoru-file-row" });
-      row.createSpan({ cls: "sun-daoru-file-name", text: file.name });
+      const name = row.createSpan({
+        cls: "sun-daoru-file-name",
+        text: displayName
+      });
+      name.setAttribute("title", displayName);
       row.createSpan({ cls: "sun-daoru-file-size", text: formatBytes(file.size) });
     }
     if (this.files.length > 6) {
@@ -20854,7 +21360,7 @@ var ImportOptionsModal = class extends import_obsidian4.Modal {
       });
     }
     new import_obsidian4.Setting(contentEl).setName("\u5BFC\u5165\u65B9\u5F0F").setDesc(
-      this.canInsert ? `\u63D2\u5165\u5230\u5F53\u524D\u7B14\u8BB0\uFF1A${this.config.insertTargetPath || "\u5F53\u524D\u7B14\u8BB0"}\u3002\u6279\u91CF\u5BFC\u5165\u53EA\u80FD\u65B0\u5EFA\u7B14\u8BB0\u3002` : "\u5F53\u524D\u6CA1\u6709\u53EF\u63D2\u5165\u7684 Markdown \u7B14\u8BB0\uFF0C\u6216\u4E00\u6B21\u9009\u62E9\u4E86\u591A\u4E2A\u6587\u4EF6\uFF0C\u56E0\u6B64\u53EA\u80FD\u65B0\u5EFA\u7B14\u8BB0\u3002"
+      this.config.folderMode ? "\u6587\u4EF6\u5939\u5BFC\u5165\u53EA\u80FD\u65B0\u5EFA\u7B14\u8BB0\uFF1B\u4F1A\u4FDD\u7559\u6E90\u6587\u4EF6\u5939\u540D\u548C\u5185\u90E8\u5C42\u7EA7\u3002" : this.canInsert ? `\u63D2\u5165\u5230\u5F53\u524D\u7B14\u8BB0\uFF1A${this.config.insertTargetPath || "\u5F53\u524D\u7B14\u8BB0"}\u3002\u6279\u91CF\u5BFC\u5165\u53EA\u80FD\u65B0\u5EFA\u7B14\u8BB0\u3002` : this.config.insertUnavailable || "\u5F53\u524D\u53EA\u80FD\u65B0\u5EFA\u7B14\u8BB0\u3002"
     ).addDropdown((dropdown) => {
       dropdown.addOption("new", "\u65B0\u5EFA\u7B14\u8BB0");
       if (this.canInsert)
@@ -20873,18 +21379,24 @@ var ImportOptionsModal = class extends import_obsidian4.Modal {
         }).open();
       })
     );
-    this.sourceSetting = new import_obsidian4.Setting(contentEl).setName("\u5199\u5165\u6765\u6E90\u4FE1\u606F").setDesc("\u5728\u7B14\u8BB0\u5F00\u5934\u5199\u5165 source \u548C imported\u3002\u53EA\u5BF9\u65B0\u5EFA\u7B14\u8BB0\u751F\u6548\u3002").addToggle(
+    this.sourceSetting = new import_obsidian4.Setting(contentEl).setName("\u5199\u5165\u6765\u6E90\u4FE1\u606F").setDesc("\u5728\u7B14\u8BB0\u5F00\u5934\u5199\u5165 source\uFF08\u539F\u6587\u4EF6\u540D\u6216\u76F8\u5BF9\u8DEF\u5F84\uFF09\u548C imported\u3002\u53EA\u5BF9\u65B0\u5EFA\u7B14\u8BB0\u751F\u6548\u3002").addToggle(
       (toggle) => toggle.setValue(this.addSourceFrontmatter).onChange((value) => {
         this.addSourceFrontmatter = value;
       })
     );
+    if (this.config.folderMode) {
+      contentEl.createEl("p", {
+        cls: "sun-daoru-modal-note",
+        text: `\u4F1A\u4FDD\u7559\u6E90\u6587\u4EF6\u5939\u300C${this.config.sourceRootName || "\u6240\u9009\u6587\u4EF6\u5939"}\u300D\u53CA\u5185\u90E8\u5C42\u7EA7\uFF0C\u5EFA\u5728\u76EE\u6807\u6587\u4EF6\u5939\u4E0B\uFF1B\u7A7A\u6587\u4EF6\u5939\u548C\u975E Word \u6587\u4EF6\u8DF3\u8FC7\u3002`
+      });
+    }
     contentEl.createEl("p", {
       cls: "sun-daoru-modal-note",
       text: this.config.attachmentDescription
     });
     contentEl.createEl("p", {
       cls: "sun-daoru-modal-note",
-      text: "\u5B57\u4F53\u3001\u5B57\u53F7\u3001\u989C\u8272\u3001\u5BF9\u9F50\u3001\u9875\u7709\u9875\u811A\u7B49 Word \u6392\u7248\u4E0D\u4F1A\u5BFC\u5165\uFF1B\u5408\u5E76\u5355\u5143\u683C\u6216\u542B\u5D4C\u5957\u5185\u5BB9\u7684\u8868\u683C\u4F1A\u4FDD\u7559\u4E3A HTML\u3002"
+      text: "\u5B57\u4F53\u3001\u5B57\u53F7\u3001\u989C\u8272\u3001\u5BF9\u9F50\u7B49 Word \u6392\u7248\u4E0D\u4F1A\u5BFC\u5165\uFF1B\u5408\u5E76\u5355\u5143\u683C\u6216\u542B\u5D4C\u5957\u5185\u5BB9\u7684\u8868\u683C\u4F1A\u4FDD\u7559\u4E3A HTML\u3002\u6CA1\u80FD\u5BFC\u5165\u7684\u5185\u5BB9\u4F1A\u5728\u5BFC\u5165\u7ED3\u679C\u91CC\u9010\u9879\u5217\u51FA\u3002"
     });
     const buttons = contentEl.createDiv({ cls: "sun-daoru-modal-buttons" });
     const cancel = buttons.createEl("button", { text: "\u53D6\u6D88" });
@@ -20954,6 +21466,11 @@ function formatBytes(bytes) {
 
 // src/ui/result-modal.ts
 var import_obsidian5 = require("obsidian");
+var KIND_LABEL = {
+  lost: "\u4E22\u5931",
+  downgraded: "\u964D\u7EA7",
+  info: "\u8BF4\u660E"
+};
 var ImportResultModal = class extends import_obsidian5.Modal {
   constructor(app, results, openAfterImport) {
     super(app);
@@ -20966,18 +21483,28 @@ var ImportResultModal = class extends import_obsidian5.Modal {
     contentEl.empty();
     const success = this.results.filter((result2) => !result2.error).length;
     const failed = this.results.length - success;
+    const lostTotal = this.results.reduce(
+      (sum, result2) => sum + result2.losses.filter((loss) => loss.kind === "lost").length,
+      0
+    );
     contentEl.createEl("h2", { text: "\u5BFC\u5165\u7ED3\u679C" });
     contentEl.createEl("p", {
       cls: "sun-daoru-modal-summary",
       text: failed === 0 ? `\u6210\u529F\u5BFC\u5165 ${success} \u4E2A\u6587\u4EF6\u3002` : `\u6210\u529F ${success} \u4E2A\uFF0C\u5931\u8D25 ${failed} \u4E2A\u3002`
     });
+    if (lostTotal > 0) {
+      contentEl.createEl("p", {
+        cls: "sun-daoru-loss-total",
+        text: `\u6709 ${lostTotal} \u7C7B\u5185\u5BB9\u6CA1\u80FD\u5BFC\u5165\uFF0C\u8BE6\u89C1\u4E0B\u9762\u7684\u300C\u4E22\u5931\u300D\u3002`
+      });
+    }
     const list = contentEl.createDiv({ cls: "sun-daoru-result-list" });
     for (const result2 of this.results) {
       this.renderResult(list, result2);
     }
     contentEl.createEl("p", {
       cls: "sun-daoru-modal-note",
-      text: "\u63D0\u793A\uFF1AWord \u7684\u5B57\u4F53\u3001\u5B57\u53F7\u3001\u989C\u8272\u3001\u5BF9\u9F50\u3001\u9875\u8FB9\u8DDD\u3001\u9875\u7709\u9875\u811A\u4E0D\u4F1A\u5BFC\u5165\uFF1B\u6807\u9898\u3001\u5217\u8868\u3001\u8868\u683C\u3001\u94FE\u63A5\u548C\u56FE\u7247\u4F1A\u5C3D\u91CF\u4FDD\u7559\u3002"
+      text: "\u6587\u5B57\u3001\u6807\u9898\u3001\u5217\u8868\u3001\u8868\u683C\u3001\u94FE\u63A5\u3001\u56FE\u7247\u548C\u56FE\u7247\u66FF\u4EE3\u6587\u5B57\u90FD\u4F1A\u4FDD\u7559\uFF1B\u5B57\u4F53\u3001\u5B57\u53F7\u3001\u989C\u8272\u3001\u5BF9\u9F50\u3001\u9875\u8FB9\u8DDD\u7B49\u6392\u7248\u4E0D\u5BFC\u5165\u3002\u6CA1\u80FD\u5BFC\u5165\u7684\u5185\u5BB9\u5DF2\u5728\u4E0A\u9762\u9010\u9879\u5217\u51FA\u3002"
     });
     const buttons = contentEl.createDiv({ cls: "sun-daoru-modal-buttons" });
     const done = buttons.createEl("button", { text: "\u5B8C\u6210", cls: "mod-cta" });
@@ -21027,13 +21554,27 @@ var ImportResultModal = class extends import_obsidian5.Modal {
       });
       actions.createSpan({ cls: "sun-daoru-muted", text: result2.notePath });
     }
-    if (result2.warnings.length > 0) {
-      const warnings = row.createEl("ul", { cls: "sun-daoru-warnings" });
-      for (const warning of result2.warnings) {
-        warnings.createEl("li", { text: warning });
+    this.renderLosses(row, result2.losses);
+    for (const warning of result2.warnings) {
+      row.createEl("p", { cls: "sun-daoru-warning-text", text: `\u63D0\u793A\uFF1A${warning}` });
+    }
+  }
+  renderLosses(row, losses) {
+    if (losses.length === 0) {
+      row.createEl("p", { cls: "sun-daoru-loss-none", text: "\u672A\u53D1\u73B0\u5185\u5BB9\u4E22\u5931\u3002" });
+      return;
+    }
+    const order = ["lost", "downgraded", "info"];
+    for (const kind of order) {
+      for (const loss of losses.filter((item) => item.kind === kind)) {
+        const line = row.createDiv({ cls: `sun-daoru-loss sun-daoru-loss-${kind}` });
+        line.createSpan({ cls: "sun-daoru-loss-tag", text: KIND_LABEL[kind] });
+        line.createSpan({
+          cls: "sun-daoru-loss-label",
+          text: `${loss.label} \xD7${loss.count}`
+        });
+        line.createSpan({ cls: "sun-daoru-loss-detail", text: loss.detail });
       }
-    } else {
-      row.createEl("p", { cls: "sun-daoru-muted", text: "\u672A\u53D1\u73B0\u56FE\u7247/\u8868\u683C\u7B49\u6587\u4EF6\u7EA7\u95EE\u9898\u3002" });
     }
   }
   openNote(path, closeModal) {
@@ -21052,6 +21593,7 @@ var ImportResultModal = class extends import_obsidian5.Modal {
 };
 
 // src/main.ts
+var SKIP_FOLDER_SEGMENTS = /* @__PURE__ */ new Set(["node_modules", "__MACOSX"]);
 var SunDaoruPlugin = class extends import_obsidian6.Plugin {
   constructor() {
     super(...arguments);
@@ -21063,11 +21605,21 @@ var SunDaoruPlugin = class extends import_obsidian6.Plugin {
       id: "import-word",
       name: "\u5BFC\u5165 Word \u6587\u6863\u2026",
       callback: () => {
-        void this.chooseAndImport();
+        void this.chooseAndImport("files");
+      }
+    });
+    this.addCommand({
+      id: "import-word-folder",
+      name: "\u5BFC\u5165 Word \u6587\u4EF6\u5939\u2026",
+      callback: () => {
+        void this.chooseAndImport("folder");
       }
     });
     this.addRibbonIcon("import", "\u5BFC\u5165 Word \u6587\u6863", () => {
-      void this.chooseAndImport();
+      void this.chooseAndImport("files");
+    });
+    this.addRibbonIcon("folder-open", "\u5BFC\u5165 Word \u6587\u4EF6\u5939", () => {
+      void this.chooseAndImport("folder");
     });
     this.addSettingTab(new SunDaoruSettingTab(this.app, this));
   }
@@ -21077,8 +21629,8 @@ var SunDaoruPlugin = class extends import_obsidian6.Plugin {
   async saveSettings() {
     await this.saveData(this.settings);
   }
-  async chooseAndImport() {
-    var _a, _b;
+  async chooseAndImport(mode) {
+    var _a, _b, _c, _d;
     if (this.importing) {
       new import_obsidian6.Notice("\u6B63\u5728\u5BFC\u5165\uFF0C\u8BF7\u7A0D\u5019\u3002");
       return;
@@ -21088,40 +21640,75 @@ var SunDaoruPlugin = class extends import_obsidian6.Plugin {
       const activeView = this.app.workspace.getActiveViewOfType(import_obsidian6.MarkdownView);
       const editor = (_a = activeView == null ? void 0 : activeView.editor) != null ? _a : null;
       const activeFile = (_b = activeView == null ? void 0 : activeView.file) != null ? _b : null;
-      const canInsert = Boolean(editor && activeFile);
-      let defaultFolder = "";
-      if (activeFile) {
-        defaultFolder = parentFolderOf(activeFile.path);
-      }
-      const files = await pickDocxFiles();
-      if (files.length === 0)
+      const inEditMode = activeView ? activeView.getMode() === "source" : false;
+      const canInsert = Boolean(editor && activeFile) && inEditMode;
+      const insertUnavailable = !activeFile ? "\u5F53\u524D\u6CA1\u6709\u6253\u5F00\u7684 Markdown \u7B14\u8BB0\uFF0C\u53EA\u80FD\u65B0\u5EFA\u7B14\u8BB0\u3002" : !inEditMode ? "\u5F53\u524D\u7B14\u8BB0\u5904\u4E8E\u9605\u8BFB\u89C6\u56FE\uFF0C\u63D2\u5165\u4E0D\u53EF\u7528\uFF1B\u8BF7\u5207\u5230\u7F16\u8F91\u89C6\u56FE\uFF0C\u6216\u6539\u7528\u65B0\u5EFA\u7B14\u8BB0\u3002" : "";
+      const defaultFolder = activeFile ? parentFolderOf(activeFile.path) : "";
+      const picked = mode === "folder" ? await pickDocxFolder() : await pickDocxFiles();
+      if (picked.length === 0)
         return;
-      const options = await new ImportOptionsModal(this.app, files, {
-        canInsert,
-        defaultTarget: this.settings.defaultTarget,
-        defaultFolder,
-        addSourceFrontmatter: this.settings.addSourceFrontmatter,
-        insertTargetPath: (activeFile == null ? void 0 : activeFile.path) || "",
-        attachmentDescription: this.settings.attachmentMode === "custom" ? `\u9644\u4EF6\u4F4D\u7F6E\uFF1A${this.settings.customAttachmentFolder}` : "\u9644\u4EF6\u4F4D\u7F6E\uFF1A\u8DDF\u968F Obsidian \u7684\u300C\u6587\u4EF6\u4E0E\u94FE\u63A5\u300D\u8BBE\u7F6E"
-      }).openAndGet();
+      let files;
+      let items;
+      let sourceRootName = "";
+      if (mode === "folder") {
+        files = picked.filter(isFolderWordFile);
+        if (files.length === 0) {
+          new import_obsidian6.Notice("\u6240\u9009\u6587\u4EF6\u5939\u91CC\u6CA1\u6709\u53EF\u5BFC\u5165\u7684 Word \u6587\u4EF6\u3002");
+          return;
+        }
+        items = files.map((file) => ({
+          file,
+          relativePath: normalizeRelativePath(file.webkitRelativePath || file.name)
+        }));
+        sourceRootName = ((_d = (_c = items[0]) == null ? void 0 : _c.relativePath) == null ? void 0 : _d.split("/").filter(Boolean)[0]) || "\u6240\u9009\u6587\u4EF6\u5939";
+      } else {
+        files = picked;
+        items = files.map((file) => ({ file }));
+      }
+      const displayNames = mode === "folder" ? items.map((item) => item.relativePath || item.file.name) : files.map((file) => file.name);
+      const options = await new ImportOptionsModal(
+        this.app,
+        files,
+        displayNames,
+        {
+          canInsert: mode === "files" ? canInsert : false,
+          insertUnavailable: mode === "files" ? insertUnavailable : "\u6587\u4EF6\u5939\u5BFC\u5165\u53EA\u80FD\u65B0\u5EFA\u7B14\u8BB0\u3002",
+          defaultTarget: mode === "folder" ? "new" : this.settings.defaultTarget,
+          defaultFolder,
+          addSourceFrontmatter: this.settings.addSourceFrontmatter,
+          insertTargetPath: (activeFile == null ? void 0 : activeFile.path) || "",
+          attachmentDescription: this.attachmentDescription(),
+          folderMode: mode === "folder",
+          sourceRootName,
+          title: mode === "folder" ? "\u5BFC\u5165 Word \u6587\u4EF6\u5939" : "\u5BFC\u5165 Word"
+        }
+      ).openAndGet();
       if (!options)
         return;
-      this.settings.defaultTarget = options.target;
+      const target = mode === "folder" ? "new" : options.target;
+      if (mode === "files")
+        this.settings.defaultTarget = options.target;
       this.settings.addSourceFrontmatter = options.addSourceFrontmatter;
       await this.saveSettings();
       const request = {
-        target: options.target,
+        target,
         folder: options.folder,
         addSourceFrontmatter: options.addSourceFrontmatter,
         editor,
         activeFilePath: (activeFile == null ? void 0 : activeFile.path) || ""
       };
       const notice = new import_obsidian6.Notice(
-        files.length === 1 ? `\u6B63\u5728\u5BFC\u5165 ${files[0].name}\u2026` : `\u6B63\u5728\u5BFC\u5165 ${files.length} \u4E2A\u6587\u4EF6\u2026`,
+        mode === "folder" ? `\u6B63\u5728\u5BFC\u5165 ${files.length} \u4E2A Word \u6587\u4EF6\u2026` : files.length === 1 ? `\u6B63\u5728\u5BFC\u5165 ${files[0].name}\u2026` : `\u6B63\u5728\u5BFC\u5165 ${files.length} \u4E2A\u6587\u4EF6\u2026`,
         0
       );
       try {
-        const results = await importFiles(
+        const results = mode === "folder" ? await importItems(
+          this.app,
+          items,
+          request,
+          this.settings,
+          (message) => notice.setMessage(message)
+        ) : await importFiles(
           this.app,
           files,
           request,
@@ -21143,7 +21730,27 @@ var SunDaoruPlugin = class extends import_obsidian6.Plugin {
       this.importing = false;
     }
   }
+  attachmentDescription() {
+    if (this.settings.groupAttachmentsByNote) {
+      return "\u9644\u4EF6\u4F4D\u7F6E\uFF1A\u7B14\u8BB0\u540C\u76EE\u5F55\u7684 <\u6587\u6863\u540D>-\u9644\u4EF6/\uFF08\u53EF\u5728\u8BBE\u7F6E\u4E2D\u5173\u95ED\uFF09";
+    }
+    return this.settings.attachmentMode === "custom" ? `\u9644\u4EF6\u4F4D\u7F6E\uFF1A${this.settings.customAttachmentFolder}` : "\u9644\u4EF6\u4F4D\u7F6E\uFF1A\u8DDF\u968F Obsidian \u7684\u300C\u6587\u4EF6\u4E0E\u94FE\u63A5\u300D\u8BBE\u7F6E";
+  }
 };
+function normalizeRelativePath(value) {
+  return value.replace(/\\/g, "/");
+}
+function isFolderWordFile(file) {
+  const relative = normalizeRelativePath(file.webkitRelativePath || file.name);
+  const segments = relative.split("/").filter(Boolean);
+  if (segments.some((segment) => segment.startsWith("~$") || segment.startsWith("."))) {
+    return false;
+  }
+  if (segments.some((segment) => SKIP_FOLDER_SEGMENTS.has(segment))) {
+    return false;
+  }
+  return /\.(docx|docm|doc)$/i.test(file.name);
+}
 /*! Bundled license information:
 
 jszip/dist/jszip.min.js:

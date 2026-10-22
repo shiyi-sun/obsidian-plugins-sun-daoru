@@ -15,15 +15,20 @@ export interface ImportDialogResult {
 
 interface ImportDialogConfig {
   canInsert: boolean;
+  insertUnavailable: string;
   defaultTarget: ImportTarget;
   defaultFolder: string;
   addSourceFrontmatter: boolean;
   attachmentDescription: string;
   insertTargetPath: string;
+  folderMode?: boolean;
+  sourceRootName?: string;
+  title?: string;
 }
 
 export class ImportOptionsModal extends Modal {
   private readonly files: File[];
+  private readonly displayNames: string[];
   private readonly config: ImportDialogConfig;
   private readonly canInsert: boolean;
   private target: ImportTarget;
@@ -34,11 +39,17 @@ export class ImportOptionsModal extends Modal {
   private folderSetting: Setting | null = null;
   private sourceSetting: Setting | null = null;
 
-  constructor(app: App, files: File[], config: ImportDialogConfig) {
+  constructor(
+    app: App,
+    files: File[],
+    displayNames: string[],
+    config: ImportDialogConfig,
+  ) {
     super(app);
     this.files = files;
+    this.displayNames = displayNames;
     this.config = config;
-    this.canInsert = config.canInsert && files.length === 1;
+    this.canInsert = config.canInsert && files.length === 1 && !config.folderMode;
     this.target =
       config.defaultTarget === "insert" && this.canInsert ? "insert" : "new";
     this.folder = config.defaultFolder;
@@ -57,20 +68,30 @@ export class ImportOptionsModal extends Modal {
     this.modalEl.addClass("sun-daoru-modal");
     contentEl.empty();
 
-    contentEl.createEl("h2", { text: "导入 Word" });
+    contentEl.createEl("h2", {
+      text:
+        this.config.title ||
+        (this.config.folderMode ? "导入 Word 文件夹" : "导入 Word"),
+    });
     const totalBytes = this.files.reduce((sum, file) => sum + file.size, 0);
     contentEl.createEl("p", {
       cls: "sun-daoru-modal-summary",
-      text:
-        this.files.length === 1
+      text: this.config.folderMode
+        ? `已选择 ${this.files.length} 个 Word 文件（共 ${formatBytes(totalBytes)}）`
+        : this.files.length === 1
           ? `已选择 1 个文件（${formatBytes(totalBytes)}）`
           : `已选择 ${this.files.length} 个文件（共 ${formatBytes(totalBytes)}）`,
     });
 
     const fileList = contentEl.createDiv({ cls: "sun-daoru-file-list" });
-    for (const file of this.files.slice(0, 6)) {
+    for (const [index, file] of this.files.slice(0, 6).entries()) {
+      const displayName = this.displayNames[index] || file.name;
       const row = fileList.createDiv({ cls: "sun-daoru-file-row" });
-      row.createSpan({ cls: "sun-daoru-file-name", text: file.name });
+      const name = row.createSpan({
+        cls: "sun-daoru-file-name",
+        text: displayName,
+      });
+      name.setAttribute("title", displayName);
       row.createSpan({ cls: "sun-daoru-file-size", text: formatBytes(file.size) });
     }
     if (this.files.length > 6) {
@@ -91,9 +112,11 @@ export class ImportOptionsModal extends Modal {
     new Setting(contentEl)
       .setName("导入方式")
       .setDesc(
-        this.canInsert
-          ? `插入到当前笔记：${this.config.insertTargetPath || "当前笔记"}。批量导入只能新建笔记。`
-          : "当前没有可插入的 Markdown 笔记，或一次选择了多个文件，因此只能新建笔记。",
+        this.config.folderMode
+          ? "文件夹导入只能新建笔记；会保留源文件夹名和内部层级。"
+          : this.canInsert
+            ? `插入到当前笔记：${this.config.insertTargetPath || "当前笔记"}。批量导入只能新建笔记。`
+            : this.config.insertUnavailable || "当前只能新建笔记。",
       )
       .addDropdown((dropdown) => {
         dropdown.addOption("new", "新建笔记");
@@ -118,12 +141,19 @@ export class ImportOptionsModal extends Modal {
 
     this.sourceSetting = new Setting(contentEl)
       .setName("写入来源信息")
-      .setDesc("在笔记开头写入 source 和 imported。只对新建笔记生效。")
+      .setDesc("在笔记开头写入 source（原文件名或相对路径）和 imported。只对新建笔记生效。")
       .addToggle((toggle) =>
         toggle.setValue(this.addSourceFrontmatter).onChange((value) => {
           this.addSourceFrontmatter = value;
         }),
       );
+
+    if (this.config.folderMode) {
+      contentEl.createEl("p", {
+        cls: "sun-daoru-modal-note",
+        text: `会保留源文件夹「${this.config.sourceRootName || "所选文件夹"}」及内部层级，建在目标文件夹下；空文件夹和非 Word 文件跳过。`,
+      });
+    }
 
     contentEl.createEl("p", {
       cls: "sun-daoru-modal-note",
@@ -131,7 +161,8 @@ export class ImportOptionsModal extends Modal {
     });
     contentEl.createEl("p", {
       cls: "sun-daoru-modal-note",
-      text: "字体、字号、颜色、对齐、页眉页脚等 Word 排版不会导入；合并单元格或含嵌套内容的表格会保留为 HTML。",
+      text:
+        "字体、字号、颜色、对齐等 Word 排版不会导入；合并单元格或含嵌套内容的表格会保留为 HTML。没能导入的内容会在导入结果里逐项列出。",
     });
 
     const buttons = contentEl.createDiv({ cls: "sun-daoru-modal-buttons" });

@@ -1,5 +1,12 @@
 import { App, Modal, Notice, TFile } from "obsidian";
 import type { ImportFileResult } from "../importer";
+import type { LossItem } from "../core/losses";
+
+const KIND_LABEL: Record<LossItem["kind"], string> = {
+  lost: "丢失",
+  downgraded: "降级",
+  info: "说明",
+};
 
 export class ImportResultModal extends Modal {
   constructor(
@@ -17,6 +24,10 @@ export class ImportResultModal extends Modal {
 
     const success = this.results.filter((result) => !result.error).length;
     const failed = this.results.length - success;
+    const lostTotal = this.results.reduce(
+      (sum, result) => sum + result.losses.filter((loss) => loss.kind === "lost").length,
+      0,
+    );
 
     contentEl.createEl("h2", { text: "导入结果" });
     contentEl.createEl("p", {
@@ -26,6 +37,12 @@ export class ImportResultModal extends Modal {
           ? `成功导入 ${success} 个文件。`
           : `成功 ${success} 个，失败 ${failed} 个。`,
     });
+    if (lostTotal > 0) {
+      contentEl.createEl("p", {
+        cls: "sun-daoru-loss-total",
+        text: `有 ${lostTotal} 类内容没能导入，详见下面的「丢失」。`,
+      });
+    }
 
     const list = contentEl.createDiv({ cls: "sun-daoru-result-list" });
     for (const result of this.results) {
@@ -34,7 +51,7 @@ export class ImportResultModal extends Modal {
 
     contentEl.createEl("p", {
       cls: "sun-daoru-modal-note",
-      text: "提示：Word 的字体、字号、颜色、对齐、页边距、页眉页脚不会导入；标题、列表、表格、链接和图片会尽量保留。",
+      text: "文字、标题、列表、表格、链接、图片和图片替代文字都会保留；字体、字号、颜色、对齐、页边距等排版不导入。没能导入的内容已在上面逐项列出。",
     });
 
     const buttons = contentEl.createDiv({ cls: "sun-daoru-modal-buttons" });
@@ -86,13 +103,30 @@ export class ImportResultModal extends Modal {
       actions.createSpan({ cls: "sun-daoru-muted", text: result.notePath });
     }
 
-    if (result.warnings.length > 0) {
-      const warnings = row.createEl("ul", { cls: "sun-daoru-warnings" });
-      for (const warning of result.warnings) {
-        warnings.createEl("li", { text: warning });
+    this.renderLosses(row, result.losses);
+
+    for (const warning of result.warnings) {
+      row.createEl("p", { cls: "sun-daoru-warning-text", text: `提示：${warning}` });
+    }
+  }
+
+  private renderLosses(row: HTMLElement, losses: LossItem[]): void {
+    if (losses.length === 0) {
+      row.createEl("p", { cls: "sun-daoru-loss-none", text: "未发现内容丢失。" });
+      return;
+    }
+
+    const order: LossItem["kind"][] = ["lost", "downgraded", "info"];
+    for (const kind of order) {
+      for (const loss of losses.filter((item) => item.kind === kind)) {
+        const line = row.createDiv({ cls: `sun-daoru-loss sun-daoru-loss-${kind}` });
+        line.createSpan({ cls: "sun-daoru-loss-tag", text: KIND_LABEL[kind] });
+        line.createSpan({
+          cls: "sun-daoru-loss-label",
+          text: `${loss.label} ×${loss.count}`,
+        });
+        line.createSpan({ cls: "sun-daoru-loss-detail", text: loss.detail });
       }
-    } else {
-      row.createEl("p", { cls: "sun-daoru-muted", text: "未发现图片/表格等文件级问题。" });
     }
   }
 

@@ -127,16 +127,70 @@
   margin: 6px 0 0;
 }
 
-.sun-daoru-warnings {
-  margin: 6px 0 0;
-  padding-left: 20px;
-  color: var(--text-warning);
+.sun-daoru-loss-total {
+  color: var(--text-error);
+  font-size: var(--font-ui-smaller);
+  margin: 2px 0 0;
+}
+
+.sun-daoru-loss {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin: 4px 0 0;
   font-size: var(--font-ui-smaller);
   line-height: 1.5;
 }
 
-.sun-daoru-warnings li {
-  margin: 2px 0;
+.sun-daoru-loss-tag {
+  flex: none;
+  padding: 0 6px;
+  border-radius: var(--radius-s);
+  font-size: var(--font-ui-smallest);
+  color: var(--normal-bg);
+}
+
+.sun-daoru-loss-lost .sun-daoru-loss-tag {
+  background: var(--color-red);
+}
+
+.sun-daoru-loss-downgraded .sun-daoru-loss-tag {
+  background: var(--color-orange);
+}
+
+.sun-daoru-loss-info .sun-daoru-loss-tag {
+  background: var(--background-modifier-border);
+  color: var(--text-muted);
+}
+
+.sun-daoru-loss-label {
+  flex: none;
+  font-weight: var(--font-semibold);
+}
+
+.sun-daoru-loss-lost .sun-daoru-loss-label {
+  color: var(--text-error);
+}
+
+.sun-daoru-loss-downgraded .sun-daoru-loss-label {
+  color: var(--text-warning);
+}
+
+.sun-daoru-loss-info .sun-daoru-loss-label {
+  color: var(--text-muted);
+  font-weight: var(--font-normal);
+}
+
+.sun-daoru-loss-detail {
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.sun-daoru-loss-none {
+  color: var(--text-success);
+  font-size: var(--font-ui-smaller);
+  margin: 6px 0 0;
 }
 
 .sun-daoru-muted {

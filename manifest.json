@@ -1,9 +1,9 @@
 {
   "id": "sun-daoru",
   "name": "导入",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "minAppVersion": "1.14.4",
-  "description": "把 Word (.docx) 文档导入为 Markdown 笔记，自动提取图片并保留标题、列表、表格和链接。",
+  "description": "把 Word (.docx) 文档导入为 Markdown 笔记，提取图片和替代文字，保留标题、列表、表格与链接，并列出没能导入的内容。",
   "author": "sun",
   "authorUrl": "",
   "isDesktopOnly": true
