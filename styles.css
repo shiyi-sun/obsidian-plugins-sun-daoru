@@ -1,0 +1,177 @@
+.sun-daoru-modal {
+  width: min(620px, 92vw);
+}
+
+.sun-daoru-modal-summary {
+  color: var(--text-muted);
+  margin: 0 0 10px;
+}
+
+.sun-daoru-file-list {
+  max-height: 168px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background: var(--background-secondary);
+  padding: 4px 10px;
+  margin: 10px 0 14px;
+}
+
+.sun-daoru-file-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.sun-daoru-file-row:last-child {
+  border-bottom: none;
+}
+
+.sun-daoru-file-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sun-daoru-file-size {
+  flex: none;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.sun-daoru-modal-note {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.5;
+  margin: 8px 0;
+}
+
+.sun-daoru-warning-text {
+  color: var(--text-error);
+  font-size: var(--font-ui-smaller);
+  margin: 6px 0;
+}
+
+.sun-daoru-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.sun-daoru-result-modal {
+  width: min(720px, 92vw);
+}
+
+.sun-daoru-result-list {
+  display: grid;
+  gap: 10px;
+  max-height: 56vh;
+  overflow-y: auto;
+  margin: 12px 0;
+  padding-right: 4px;
+}
+
+.sun-daoru-result-row {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--background-secondary);
+  padding: 10px 12px;
+}
+
+.sun-daoru-result-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sun-daoru-result-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: var(--font-semibold);
+}
+
+.sun-daoru-status-ok {
+  flex: none;
+  color: var(--text-success);
+  font-size: var(--font-ui-smaller);
+}
+
+.sun-daoru-status-error {
+  flex: none;
+  color: var(--text-error);
+  font-size: var(--font-ui-smaller);
+}
+
+.sun-daoru-result-meta {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  margin: 4px 0;
+}
+
+.sun-daoru-result-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 6px 0;
+}
+
+.sun-daoru-error-text {
+  color: var(--text-error);
+  margin: 6px 0 0;
+}
+
+.sun-daoru-warnings {
+  margin: 6px 0 0;
+  padding-left: 20px;
+  color: var(--text-warning);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.5;
+}
+
+.sun-daoru-warnings li {
+  margin: 2px 0;
+}
+
+.sun-daoru-muted {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.sun-daoru-settings-note {
+  margin-top: 22px;
+  padding-top: 12px;
+  border-top: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.5;
+}
+
+.sun-daoru-settings-note p {
+  margin: 4px 0;
+}
+
+@media (max-width: 640px) {
+  .sun-daoru-file-row,
+  .sun-daoru-result-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sun-daoru-modal-buttons {
+    flex-direction: column-reverse;
+  }
+
+  .sun-daoru-modal-buttons button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "obsidian-sun-daoru",
+  "version": "0.1.0",
+  "description": "把 Word (.docx) 文档导入为 Obsidian Markdown 笔记",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
+    "typecheck": "tsc --noEmit",
+    "test:convert": "node scripts/convert-sample.mjs"
+  },
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "word",
+    "docx",
+    "import"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "mammoth": "^1.13.0",
+    "turndown": "^7.2.4",
+    "turndown-plugin-gfm": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/turndown": "^5.0.5",
+    "builtin-modules": "^3.3.0",
+    "esbuild": "^0.20.0",
+    "obsidian": "1.14.4",
+    "typescript": "^5.3.3"
+  },
+  "allowScripts": {
+    "esbuild@0.20.2": true
+  }
+}

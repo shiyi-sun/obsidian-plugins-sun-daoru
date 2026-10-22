@@ -1,0 +1,18 @@
+# 依赖
+node_modules/
+
+# 构建产物：main.js 随版本提交，clone 后可直接安装
+dist/
+
+# 测试临时产物
+.dist-test/
+
+# 本地 Word 样本（体积大，不入库）
+*.docx
+*.docm
+
+# 系统 / 编辑器
+.DS_Store
+Thumbs.db
+.obsidian/
+*.log
