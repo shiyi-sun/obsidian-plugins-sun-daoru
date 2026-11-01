@@ -484,7 +484,7 @@ export default async function (ctx) {
 
         plugin.settings.attachmentMode = "obsidian";
         plugin.settings.customAttachmentFolder = "附件/导入";
-        plugin.settings.groupAttachmentsByNote = true;
+        plugin.settings.groupAttachmentsByNote = false;
         plugin.settings.normalizeHeadingLevels = false;
         plugin.settings.openAfterImport = true;
         plugin.settings.defaultTarget = "new";

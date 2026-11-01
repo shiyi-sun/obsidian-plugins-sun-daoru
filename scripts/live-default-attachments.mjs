@@ -17,7 +17,7 @@ export default async function (ctx) {
       const app = window.app;
       const plugin = app.plugins.plugins["sun-daoru"];
       const imagePattern =
-        /(?:^|\/)功能营养素手册-\d+\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff|emf|wmf)$/i;
+        /(?:^|\/)功能营养素手册-\d+(?: \d+)?\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff|emf|wmf)$/i;
 
       const waitFor = async (selector, timeout) => {
         const started = Date.now();
@@ -219,7 +219,7 @@ export default async function (ctx) {
 
           plugin.settings.attachmentMode = "obsidian";
           plugin.settings.customAttachmentFolder = "附件/导入";
-          plugin.settings.groupAttachmentsByNote = true;
+          plugin.settings.groupAttachmentsByNote = false;
           plugin.settings.normalizeHeadingLevels = false;
           plugin.settings.openAfterImport = true;
           plugin.settings.defaultTarget = "new";

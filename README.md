@@ -13,7 +13,7 @@ Requires Obsidian 1.14.4 or later. The plugin interface is currently in Chinese;
 - Create new notes or insert the converted content into the current note.
 - Keep headings, lists, tables, links, images, and image alt text.
 - Convert simple tables to Markdown; keep complex tables as HTML.
-- Save images beside the note, in Obsidian's configured attachment location, or in a fixed folder.
+- Save images in Obsidian's configured attachment location, beside the note, or in a fixed folder.
 - Report lost and downgraded content for every file.
 - Run an extra text check and flag paragraphs that cannot be found in the generated note.
 - Optionally write `source` and `imported` frontmatter, and normalize heading levels for documents built around a Title style.
@@ -77,16 +77,16 @@ Daoru also compares text segments from the document XML with the generated Markd
 
 ## Attachments
 
-By default, images are saved to a folder named `<note name>-附件/` next to the note, with numbered file names such as `001.png` and `002.jpg`. You can turn this off and either follow Obsidian's "Files & Links" attachment settings or use a fixed folder relative to the vault root.
+By default, attachments follow Obsidian's "Files & Links" attachment setting. You can enable "Per-document attachment folder" to save images to `<note name>-附件/` next to the note, or use a fixed folder relative to the vault root.
 
-With the default per-document attachment folder, inserting into the current note places attachments next to that note.
+When the per-document folder is on, inserting into the current note places attachments next to that note.
 
 ## Settings
 
 | Setting | Default | Description |
 | --- | --- | --- |
 | Default import action | New note | Create a new note or insert into the current note. Batch and folder imports always create new notes. |
-| Per-document attachment folder | On | Save images to `<note name>-附件/` beside the note. |
+| Per-document attachment folder | Off | Save images to `<note name>-附件/` beside the note. |
 | Attachment location | Follow Obsidian | Used when the per-document folder is off. Follow Obsidian's Files & Links setting or use a fixed folder. |
 | Attachment folder | `附件/导入` | Custom folder relative to the vault root. Created automatically when needed. |
 | Normalize heading levels | Off | If the document uses a Title style, move other headings down one level. |

@@ -1,6 +1,6 @@
 {
   "name": "obsidian-sun-daoru",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "把 Word (.docx) 文档导入为 Obsidian Markdown 笔记",
   "main": "main.js",
   "scripts": {

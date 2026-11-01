@@ -26153,7 +26153,7 @@ var DEFAULT_SETTINGS = {
   defaultTarget: "new",
   attachmentMode: "obsidian",
   customAttachmentFolder: "\u9644\u4EF6/\u5BFC\u5165",
-  groupAttachmentsByNote: true,
+  groupAttachmentsByNote: false,
   normalizeHeadingLevels: false,
   addSourceFrontmatter: false,
   openAfterImport: true
@@ -26174,7 +26174,7 @@ var SunDaoruSettingTab = class extends import_obsidian3.PluginSettingTab {
       })
     );
     new import_obsidian3.Setting(containerEl).setName("\u6309\u6587\u6863\u5EFA\u9644\u4EF6\u5B50\u6587\u4EF6\u5939").setDesc(
-      "\u5F00\u542F\u65F6\u56FE\u7247\u653E\u5230\u7B14\u8BB0\u540C\u76EE\u5F55\u7684\u300C<\u6587\u6863\u540D>-\u9644\u4EF6/\u300D\uFF1B\u63D2\u5165\u5F53\u524D\u7B14\u8BB0\u65F6\u653E\u5230\u5F53\u524D\u7B14\u8BB0\u76EE\u5F55\u4E0B\u3002\u5173\u95ED\u540E\u6539\u7528\u4E0B\u9762\u7684\u9644\u4EF6\u4F4D\u7F6E\u8BBE\u7F6E\u3002"
+      "\u5F00\u542F\u65F6\u56FE\u7247\u653E\u5230\u7B14\u8BB0\u540C\u76EE\u5F55\u7684\u300C<\u6587\u6863\u540D>-\u9644\u4EF6/\u300D\uFF1B\u63D2\u5165\u5F53\u524D\u7B14\u8BB0\u65F6\u653E\u5230\u5F53\u524D\u7B14\u8BB0\u76EE\u5F55\u4E0B\u3002\u5173\u95ED\u540E\u6539\u7528\u4E0B\u9762\u7684\u9644\u4EF6\u4F4D\u7F6E\u8BBE\u7F6E\uFF08\u9ED8\u8BA4\u5173\u95ED\uFF09\u3002"
     ).addToggle(
       (toggle) => toggle.setValue(this.plugin.settings.groupAttachmentsByNote).onChange(async (value) => {
         this.plugin.settings.groupAttachmentsByNote = value;

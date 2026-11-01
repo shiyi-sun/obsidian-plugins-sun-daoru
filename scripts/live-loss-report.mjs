@@ -315,6 +315,7 @@ export default async function (ctx) {
 
     const sandbox = app.vault.getAbstractFileByPath("__daoru自测__");
     if (sandbox) await app.vault.delete(sandbox, true);
+    plugin.settings.groupAttachmentsByNote = false;
     plugin.settings.openAfterImport = true;
     await plugin.saveSettings();
     const welcome = app.vault.getAbstractFileByPath("欢迎.md");

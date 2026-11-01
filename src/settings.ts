@@ -18,7 +18,7 @@ export const DEFAULT_SETTINGS: SunDaoruSettings = {
   defaultTarget: "new",
   attachmentMode: "obsidian",
   customAttachmentFolder: "附件/导入",
-  groupAttachmentsByNote: true,
+  groupAttachmentsByNote: false,
   normalizeHeadingLevels: false,
   addSourceFrontmatter: false,
   openAfterImport: true,
@@ -55,7 +55,7 @@ export class SunDaoruSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("按文档建附件子文件夹")
       .setDesc(
-        "开启时图片放到笔记同目录的「<文档名>-附件/」；插入当前笔记时放到当前笔记目录下。关闭后改用下面的附件位置设置。",
+        "开启时图片放到笔记同目录的「<文档名>-附件/」；插入当前笔记时放到当前笔记目录下。关闭后改用下面的附件位置设置（默认关闭）。",
       )
       .addToggle((toggle) =>
         toggle

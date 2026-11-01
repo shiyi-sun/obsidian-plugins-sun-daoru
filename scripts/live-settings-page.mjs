@@ -205,6 +205,14 @@ const restored = await settingsDump();
 check("再点一次全部还原", JSON.stringify(restored) === JSON.stringify(before), JSON.stringify(restored));
 
 // 附件位置：分组开着时应该置灰；关掉分组后能切「固定文件夹」并出现文件夹输入框
+const setGroup = async (wanted) => {
+  if ((await settingsDump()).groupAttachmentsByNote === wanted) return;
+  await scrollRowIntoView("按文档建附件子文件夹");
+  const row = (await readPage()).items.find((i) => i.name === "按文档建附件子文件夹");
+  await win.click(row.box.x, row.box.y);
+  await sleep(400);
+};
+await setGroup(true);
 const disabledWithGroup = await win.eval(`
   const el = Array.from(document.querySelectorAll(".vertical-tab-content .setting-item"))
     .find((row) => (row.querySelector(".setting-item-name")?.textContent || "").trim() === "附件位置");
@@ -217,10 +225,7 @@ check(
   JSON.stringify(disabledWithGroup)
 );
 
-await scrollRowIntoView("按文档建附件子文件夹");
-const groupRow = (await readPage()).items.find((i) => i.name === "按文档建附件子文件夹");
-await win.click(groupRow.box.x, groupRow.box.y);
-await sleep(400);
+await setGroup(false);
 const enabledAfterUngroup = await win.eval(`
   const el = Array.from(document.querySelectorAll(".vertical-tab-content .setting-item"))
     .find((row) => (row.querySelector(".setting-item-name")?.textContent || "").trim() === "附件位置");
@@ -255,7 +260,7 @@ check(
 );
 check("附件文件夹说明写明相对库根", (folderItem?.desc || "").includes("相对于库根目录"), folderItem?.desc);
 
-// 还原：固定文件夹 → 跟随 Obsidian，并把分组开关打开
+// 还原：固定文件夹 → 跟随 Obsidian，并把分组开关恢复到测试前状态
 await win.eval(`
   const el = Array.from(document.querySelectorAll(".vertical-tab-content .setting-item"))
     .find((row) => (row.querySelector(".setting-item-name")?.textContent || "").trim() === "附件位置");
@@ -265,13 +270,15 @@ await win.eval(`
   await new Promise((r) => setTimeout(r, 500));
   return true;
 `);
-await scrollRowIntoView("按文档建附件子文件夹");
-const groupRow2 = (await readPage()).items.find((i) => i.name === "按文档建附件子文件夹");
-await win.click(groupRow2.box.x, groupRow2.box.y);
-await sleep(400);
+await setGroup(before.groupAttachmentsByNote);
 
 const finalDump = await settingsDump();
-check("收尾：附件位置还原为默认", finalDump.attachmentMode === before.attachmentMode, JSON.stringify(finalDump));
+check(
+  "收尾：附件位置与分组恢复测试前设置",
+  finalDump.attachmentMode === before.attachmentMode &&
+    finalDump.groupAttachmentsByNote === before.groupAttachmentsByNote,
+  JSON.stringify(finalDump),
+);
 
 await win.screenshot(`${process.env.TEMP}\\daoru-settings-page.png`).catch(() => {});
 await main.eval(`app.setting.close(); return true;`);

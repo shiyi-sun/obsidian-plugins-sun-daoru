@@ -306,7 +306,7 @@ export default async function (ctx) {
     }
     delete window.__lockFixture;
     delete window.__lockMode;
-    plugin.settings.groupAttachmentsByNote = true;
+    plugin.settings.groupAttachmentsByNote = false;
     plugin.settings.defaultTarget = "new";
     plugin.settings.openAfterImport = true;
     await plugin.saveSettings();
