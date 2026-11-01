@@ -213,6 +213,15 @@
   margin: 4px 0;
 }
 
+input.sun-daoru-file-input {
+  position: fixed;
+  top: 0;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
 @media (max-width: 640px) {
   .sun-daoru-file-row,
   .sun-daoru-result-header {

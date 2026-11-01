@@ -469,7 +469,9 @@ export default async function (ctx) {
         const plugin = app.plugins.plugins["sun-daoru"];
 
         for (const close of Array.from(
-          document.querySelectorAll(".modal-container .modal-close-button"),
+          document.querySelectorAll(
+            ".modal-container .modal-close-button, .sun-daoru-modal .modal-header-button",
+          ),
         )) {
           if (close instanceof HTMLElement) close.click();
         }

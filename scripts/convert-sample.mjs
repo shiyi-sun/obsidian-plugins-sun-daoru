@@ -28,6 +28,11 @@ await esbuild.build({
   platform: "node",
   format: "cjs",
   target: "node18",
+  alias: {
+    jszip: path.join(root, "node_modules/jszip/lib/index.js"),
+    immediate: path.join(root, "src/shims/immediate.cjs"),
+    setimmediate: path.join(root, "src/shims/setimmediate.ts"),
+  },
   outfile: bundlePath,
   logLevel: "silent",
 });

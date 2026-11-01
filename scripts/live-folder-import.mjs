@@ -17,7 +17,7 @@ const tiny = {
 };
 const tinyBase = "3我热天热顺丰到付到付电风扇电风扇发射点手动阀手动阀";
 const imageDoc = {
-  path: path.join(os.tmpdir(), "daoru-audit", "one-image.docx"),
+  path: path.join(root, "scripts", "fixtures", "one-image.docx"),
   name: "单图报告.docx",
 };
 if (!fs.existsSync(imageDoc.path)) {
@@ -352,7 +352,9 @@ export default async function (ctx) {
         };
       } finally {
         for (const close of Array.from(
-          document.querySelectorAll(".modal-container .modal-close-button"),
+          document.querySelectorAll(
+            ".modal-container .modal-close-button, .sun-daoru-modal .modal-header-button",
+          ),
         )) {
           if (close instanceof HTMLElement) close.click();
         }

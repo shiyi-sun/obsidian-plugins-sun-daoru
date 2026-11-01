@@ -9,12 +9,7 @@ function pickFiles(directory: boolean): Promise<File[]> {
       input.setAttribute("webkitdirectory", "");
       input.setAttribute("directory", "");
     }
-    input.style.position = "fixed";
-    input.style.left = "-9999px";
-    input.style.top = "0";
-    input.style.width = "1px";
-    input.style.height = "1px";
-    input.style.opacity = "0";
+    input.classList.add("sun-daoru-file-input");
     document.body.appendChild(input);
 
     let settled = false;

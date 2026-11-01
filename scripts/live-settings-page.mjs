@@ -69,7 +69,9 @@ const check = (label, ok, detail = "") => results.push({ label, ok: !!ok, detail
 const main = await attach((t) => t.type === "page" && t.url.includes("index.html"));
 await main.eval(`
   for (let i = 0; i < 10; i++) {
-    const close = document.querySelector(".modal-container .modal-close-button");
+    const close = document.querySelector(
+      ".modal-container .modal-close-button, .sun-daoru-modal .modal-header-button",
+    );
     if (!close) break;
     close.click();
     await new Promise((r) => setTimeout(r, 150));

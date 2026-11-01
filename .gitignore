@@ -10,6 +10,8 @@ dist/
 # 本地 Word 样本（体积大，不入库）
 *.docx
 *.docm
+# 实机测试用的小 fixture 例外
+!scripts/fixtures/*.docx
 
 # 系统 / 编辑器
 .DS_Store

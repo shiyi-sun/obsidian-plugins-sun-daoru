@@ -41,7 +41,7 @@ export default class SunDaoruPlugin extends Plugin {
       void this.chooseAndImport("files");
     });
 
-    this.addRibbonIcon("folder-open", "导入 Word 文件夹", () => {
+    this.addRibbonIcon("folder-input", "导入 Word 文件夹", () => {
       void this.chooseAndImport("folder");
     });
 

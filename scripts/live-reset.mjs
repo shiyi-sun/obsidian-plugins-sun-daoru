@@ -8,7 +8,9 @@ export default async function (ctx) {
       await sleep(500);
     }
     for (let i = 0; i < 20; i++) {
-      const close = document.querySelector(".modal-container .modal-close-button");
+      const close = document.querySelector(
+        ".modal-container .modal-close-button, .sun-daoru-modal .modal-header-button",
+      );
       if (!close) break;
       if (close instanceof HTMLElement) close.click();
       await sleep(200);

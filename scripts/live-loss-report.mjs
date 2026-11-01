@@ -1,9 +1,9 @@
 /*
 丢失清单与链接/表格图片的实机回归。
 
-需要一个「什么都带一点」的烤测文档（批注、公式、页眉页脚、书签跳转、
-超链接图片、合并单元格里的图片）。默认路径在系统临时目录，可用环境变量
-DAORU_AUDIT_FIXTURE 指定；文件不存在时整个用例跳过，不算失败。
+默认使用仓库里的 scripts/fixtures/audit-comprehensive.docx（批注、公式、
+页眉页脚、书签跳转、超链接图片、合并单元格里的图片）；可用环境变量
+DAORU_AUDIT_FIXTURE 指定其他文档。
 
   DAORU_AUDIT_FIXTURE=/path/to/doc.docx node ../sun-home/scripts/cdp/run.mjs scripts/live-loss-report.mjs
 
@@ -12,11 +12,13 @@ DAORU_AUDIT_FIXTURE 指定；文件不存在时整个用例跳过，不算失败
 */
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_FIXTURE = path.join(
-  process.env.LOCALAPPDATA || "",
-  "Temp",
-  "daoru-audit",
+  root,
+  "scripts",
+  "fixtures",
   "audit-comprehensive.docx",
 );
 

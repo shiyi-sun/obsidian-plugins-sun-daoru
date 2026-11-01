@@ -40,7 +40,7 @@ export default async function (ctx) {
       const closeAllModals = async () => {
         for (let i = 0; i < 10; i++) {
           const close = document.querySelector(
-            ".modal-container .modal-close-button",
+            ".modal-container .modal-close-button, .sun-daoru-modal .modal-header-button",
           );
           if (!close) break;
           if (close instanceof HTMLElement) close.click();

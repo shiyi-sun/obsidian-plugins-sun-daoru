@@ -1,10 +1,13 @@
 import JSZip from "jszip";
 import * as mammoth from "mammoth";
-import { LossItem, scanLosses } from "./losses";
+import { FORMULA_PLACEHOLDER, LossItem, scanLosses } from "./losses";
 import { buildStyleMap } from "./styles";
 import { countMatches, decodeXml } from "./xml";
 
 export const IMAGE_TOKEN_PREFIX = "sun-daoru-image-";
+
+const FORMULA_TOKEN_PREFIX = "SUNDAORUFORMULAMARK";
+const NOTE_PART_NAMES = ["word/footnotes.xml", "word/endnotes.xml"];
 
 export interface PendingImage {
   token: string;
@@ -60,6 +63,7 @@ export async function convertDocx(
   }
 
   const documentXml = await documentFile.async("string");
+  const noteParts = await readNoteParts(zip);
   const stylesFile = zip.file("word/styles.xml");
   const stylesXml = stylesFile ? await stylesFile.async("string") : "";
 
@@ -72,9 +76,28 @@ export async function convertDocx(
   const warnings: string[] = [];
   const imageReadFailures: number[] = [];
 
+  // mammoth 会整块丢掉 OMML；先在 XML 层换成文本占位，公式位置才能跟着原文走
+  let formulaIndex = 0;
+  const nextFormulaIndex = () => ++formulaIndex;
+  const patchedDocumentXml = addFormulaPlaceholders(documentXml, nextFormulaIndex);
+  if (patchedDocumentXml !== documentXml) {
+    zip.file("word/document.xml", patchedDocumentXml);
+  }
+  for (const part of noteParts) {
+    const patched = addFormulaPlaceholders(part.xml, nextFormulaIndex);
+    if (patched !== part.xml) zip.file(part.name, patched);
+  }
+  const input =
+    formulaIndex > 0
+      ? nodeOrBrowserInput(
+          // 只重排、不重压图片，避免为了导入再把整包图片压缩一遍
+          await zip.generateAsync({ type: "arraybuffer", compression: "STORE" }),
+        )
+      : nodeOrBrowserInput(data);
+
   let imageIndex = 0;
   const result = await mammoth.convertToHtml(
-    nodeOrBrowserInput(data),
+    input,
     {
       styleMap: styleMap.entries,
       ignoreEmptyParagraphs: true,
@@ -107,13 +130,25 @@ export async function convertDocx(
     throw new Error("未能从文档中读取正文内容。");
   }
 
-  const html = result.value;
+  const markedFormulaTokens = new Set<string>();
+  const html = result.value.replace(
+    new RegExp(`${FORMULA_TOKEN_PREFIX}(\\d+)`, "g"),
+    (token) => {
+      markedFormulaTokens.add(token);
+      return FORMULA_PLACEHOLDER;
+    },
+  );
 
   const internalLinks = Array.from(html.matchAll(INTERNAL_ANCHOR))
     .map((match) => decodeXml(match[1]))
     .filter((name) => name && !MAMMOTH_ANCHOR.test(name)).length;
 
-  const losses = await scanLosses(zip, documentXml, { html, internalLinks });
+  const losses = await scanLosses(zip, documentXml, {
+    html,
+    internalLinks,
+    noteParts: noteParts.map((part) => part.xml),
+    markedFormulas: markedFormulaTokens.size,
+  });
 
   // 链接到文件的图片已经在丢失清单里单独报了，这里只报剩下的读取失败，避免重复
   const externalImages =
@@ -150,6 +185,35 @@ export async function convertDocx(
       images: images.length,
     },
   };
+}
+
+async function readNoteParts(zip: JSZip): Promise<{ name: string; xml: string }[]> {
+  const parts: { name: string; xml: string }[] = [];
+  for (const name of NOTE_PART_NAMES) {
+    const file = zip.file(name);
+    if (file) parts.push({ name, xml: await file.async("string") });
+  }
+  return parts;
+}
+
+function addFormulaPlaceholders(xml: string, nextIndex: () => number): string {
+  const run = () =>
+    `<w:r><w:t xml:space="preserve">${FORMULA_TOKEN_PREFIX}${nextIndex()}</w:t></w:r>`;
+  return xml.replace(
+    /<w:(?:del|moveFrom)\b[\s\S]*?<\/w:(?:del|moveFrom)>|<m:oMathPara\b[^>]*>[\s\S]*?<\/m:oMathPara>|<m:oMath\b[^>]*>[\s\S]*?<\/m:oMath>/g,
+    (match) => {
+      // 删除修订里的公式不该出现在笔记里，保持原样交给 mammoth 丢弃
+      if (/^<w:(?:del|moveFrom)\b/.test(match)) return match;
+      if (match.startsWith("<m:oMathPara")) {
+        // 显示公式的外层 wrapper 也会被整块丢弃，必须连 wrapper 一起换
+        const total = Math.max(1, countMatches(match, /<m:oMath\b/g));
+        let replacement = "";
+        for (let i = 0; i < total; i++) replacement += run();
+        return replacement;
+      }
+      return run();
+    },
+  );
 }
 
 function assertZip(data: ArrayBuffer): void {

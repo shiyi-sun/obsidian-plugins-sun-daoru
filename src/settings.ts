@@ -150,7 +150,7 @@ export class SunDaoruSettingTab extends PluginSettingTab {
     });
     note.createEl("p", {
       text:
-        "字体、字号、颜色、对齐、页边距等排版信息不会导入；复杂表格保留为 HTML。页眉页脚、批注、公式等真正丢掉的内容会在导入结果里逐项列出。",
+        "字体、字号、颜色、对齐、页边距等排版信息不会导入；复杂表格保留为 HTML。页眉页脚、批注、公式等真正丢掉的内容会在导入结果里逐项列出，公式还会在正文原位置标出。",
     });
     note.createEl("p", {
       text: "文件夹导入会保留源文件夹名和内部层级，空文件夹与非 Word 文件跳过。",

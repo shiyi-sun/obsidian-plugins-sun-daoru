@@ -6,17 +6,14 @@
 每一种都要满足：不产生笔记、不残留弹窗、plugin.importing 回到 false，
 最后再跑一次真实导入证明锁没被锁死。
 
-fixture 默认用 %LOCALAPPDATA%/Temp/daoru-audit/one-image.docx（含 1 张图）。
+fixture 默认用仓库里的 scripts/fixtures/one-image.docx（含 1 张图）。
 */
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const FIXTURE = path.join(
-  process.env.LOCALAPPDATA || "",
-  "Temp",
-  "daoru-audit",
-  "one-image.docx",
-);
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const FIXTURE = path.join(root, "scripts", "fixtures", "one-image.docx");
 const SANDBOX = "__daoru自测__";
 const NOTE = `${SANDBOX}/锁测试.md`;
 
@@ -44,7 +41,9 @@ export default async function (ctx) {
     const releaseStart = Date.now();
     while (plugin.importing && Date.now() - releaseStart < 8000) await sleep(150);
     for (let i = 0; i < 10; i++) {
-      const close = document.querySelector(".modal-container .modal-close-button");
+      const close = document.querySelector(
+        ".modal-container .modal-close-button, .sun-daoru-modal .modal-header-button",
+      );
       if (!close) break;
       close.click();
       await sleep(150);
@@ -137,12 +136,14 @@ export default async function (ctx) {
   const a2 = await startImport();
   check("Esc 用例：导入面板打开", a2.modal === true);
   const hasCloseButton = await inPage(async () =>
-    !!document.querySelector(".sun-daoru-modal .modal-close-button"),
+    !!document.querySelector(
+      ".sun-daoru-modal .modal-close-button, .sun-daoru-modal .modal-header-button",
+    ),
   );
   check(
     "导入面板提供右上角关闭按钮",
     hasCloseButton === true,
-    hasCloseButton ? "有" : "面板 DOM 里没有 .modal-close-button，用户只能 Esc 或点遮罩关闭",
+    hasCloseButton ? "有" : "面板 DOM 里没有关闭按钮，用户只能 Esc 或点遮罩关闭",
   );
   await ctx.key("Escape", "Escape", 27);
   const a3 = await waitIdle(4000);
@@ -156,7 +157,9 @@ export default async function (ctx) {
   const b1 = await countFiles();
   const b2 = await startImport();
   check("X 用例：导入面板打开", b2.modal === true);
-  const closeRect = await openModalRect(".sun-daoru-modal .modal-close-button");
+  const closeRect = await openModalRect(
+    ".sun-daoru-modal .modal-close-button, .sun-daoru-modal .modal-header-button",
+  );
   let b3 = { idle: true, skipped: "没有 X 按钮，已用 Esc 收场" };
   if (closeRect) {
     await ctx.click(closeRect.x, closeRect.y);

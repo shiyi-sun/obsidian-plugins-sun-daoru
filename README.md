@@ -55,7 +55,7 @@ Empty folders, non-Word files, hidden items (`~$` temporary files or names start
 - Headers and footers.
 - Comments. The commented text itself is kept.
 - Text deleted by unaccepted tracked changes. Inserted text is kept.
-- Word equations (OMML). They are counted in the report but are not converted.
+- Word equations (OMML). They are not converted; each equation in the visible body leaves a `【公式未导入】` marker at its original position and is counted in the report.
 - Charts, SmartArt, and embedded OLE objects such as Excel worksheets.
 - Images inserted as "link to file", because the image data is not stored inside the document.
 - Field results such as page numbers, tables of contents, and cross-references. Some fields may be incomplete.
@@ -71,7 +71,7 @@ Every import ends with a per-file report:
 - **降级 (downgraded)** — content kept in a reduced form, such as field results or non-previewable images.
 - **说明 (info)** — useful notes, such as duplicate image references.
 
-Lost items include comments, headers and footers, equations, charts and embedded objects, externally linked images, internal jumps, text from text boxes that could not be read, and deleted tracked changes. Each item shows a count and, where possible, a short sample of the affected content.
+Lost items include comments, headers and footers, equations, charts and embedded objects, externally linked images, internal jumps, text from text boxes that could not be read, and deleted tracked changes. Each item shows a count and, where possible, a short sample of the affected content. Visible equations are also marked in the note at their original positions; searching for `公式未导入` jumps to each one.
 
 Daoru also compares text segments from the document XML with the generated Markdown and reports paragraphs it cannot find. This catches content loss outside the known categories. If that warning appears, keep the original document for troubleshooting.
 

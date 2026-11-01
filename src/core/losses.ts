@@ -9,18 +9,23 @@ export interface LossItem {
   detail: string;
 }
 
+export const FORMULA_PLACEHOLDER = "【公式未导入】";
+
 export interface LossContext {
   /** mammoth 产出的 HTML，用来验证文本框文字是否真的进了正文 */
   html: string;
   /** 正文里指向文档内书签/标题的跳转数量 */
   internalLinks: number;
+  /** 脚注/尾注正文；提前读取，避免转换前插入的公式标记影响清点 */
+  noteParts: string[];
+  /** 实际出现在笔记里的公式标记数量 */
+  markedFormulas: number;
 }
 
 const TEXT_TAG = /<w:t(?:\s[^>]*)?>/g;
 const TEXT_RUN = /<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g;
 const DELETED_TEXT_RUN = /<w:delText(?:\s[^>]*)?>([\s\S]*?)<\/w:delText>/g;
 const MATH_TEXT_RUN = /<m:t(?:\s[^>]*)?>([\s\S]*?)<\/m:t>/g;
-const BODY_PART = /^word\/(?:document|footnotes|endnotes)\.xml$/;
 const HEADER_FOOTER_PART = /^word\/(?:header|footer)\d*\.xml$/;
 
 export async function scanLosses(
@@ -30,7 +35,7 @@ export async function scanLosses(
 ): Promise<LossItem[]> {
   const losses: LossItem[] = [];
 
-  const bodyParts: string[] = [documentXml];
+  const bodyParts: string[] = [documentXml, ...ctx.noteParts];
   let headerFooterParts = 0;
   let headerFooterTexts = 0;
   let headerFooterImages = 0;
@@ -43,13 +48,12 @@ export async function scanLosses(
       headerFooterParts++;
       headerFooterTexts += count(xml, TEXT_TAG);
       headerFooterImages += count(xml, /<a:blip\b/g);
-    } else if (BODY_PART.test(entry.name) && entry.name !== "word/document.xml") {
-      bodyParts.push(await entry.async("string"));
     }
   }
 
   const body = bodyParts.join("\n");
-  const plainHtml = stripTags(ctx.html);
+  // 公式标记会插进文本框文字的中间，比对前先去掉，否则会把已导入的文本框误报成丢失
+  const plainHtml = stripTags(ctx.html).split(FORMULA_PLACEHOLDER).join("");
 
   const commentsFile = zip.file("word/comments.xml");
   if (commentsFile) {
@@ -77,11 +81,34 @@ export async function scanLosses(
 
   const formulas = count(body, /<m:oMath\b/g);
   if (formulas > 0) {
+    const visibleBody = body.replace(
+      /<w:(?:del|moveFrom)\b[\s\S]*?<\/w:(?:del|moveFrom)>/g,
+      "",
+    );
+    const deletedFormulas = formulas - count(visibleBody, /<m:oMath\b/g);
+    const markable = Math.max(0, formulas - deletedFormulas);
+    const marked = Math.min(ctx.markedFormulas, markable);
+    const markerNotes: string[] = [];
+    if (marked > 0) {
+      markerNotes.push(
+        `已在笔记中对应位置标出 ${marked} 处（搜索「公式未导入」可定位）。`,
+      );
+    }
+    if (markable > marked) {
+      markerNotes.push(
+        `另有 ${markable - marked} 处无法在正文中定位（可能在文本框或嵌入对象里）。`,
+      );
+    }
+    if (deletedFormulas > 0) {
+      markerNotes.push(
+        `${deletedFormulas} 处位于已删除的修订里，不会出现在笔记中。`,
+      );
+    }
     losses.push({
       kind: "lost",
       label: "公式",
       count: formulas,
-      detail: `公式对象整体不导入，含其中的文字。例如：${preview(sample(body, MATH_TEXT_RUN))}`,
+      detail: `公式对象整体不导入，含其中的文字。${markerNotes.join("")}例如：${preview(sample(body, MATH_TEXT_RUN))}`,
     });
   }
 
