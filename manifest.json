@@ -1,10 +1,10 @@
 {
   "id": "sun-daoru",
-  "name": "导入",
-  "version": "0.1.4",
+  "name": "Daoru",
+  "version": "0.1.5",
   "minAppVersion": "1.14.4",
   "description": "把 Word (.docx) 文档导入为 Markdown 笔记，提取图片和替代文字，保留标题、列表、表格与链接，并列出没能导入的内容。",
-  "author": "sun",
+  "author": "sun | 公众号：十一营养师",
   "authorUrl": "",
   "isDesktopOnly": true
 }
